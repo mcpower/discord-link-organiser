@@ -7,7 +7,8 @@ import {
   Message,
   Snowflake,
 } from "discord.js";
-import { token } from "./config";
+import { channelId, guildId, token } from "./config";
+import assert from "assert";
 
 // Create a new client instance
 const client = new Client({
@@ -15,8 +16,16 @@ const client = new Client({
 });
 
 // When the client is ready, run this code (only once)
-client.once("ready", (client) => {
+client.once("ready", async (client) => {
   console.log(`Logged in as ${client.user.tag}`);
+  const guild = await client.guilds.fetch(guildId);
+  const channel = await guild.channels.fetch(channelId);
+  assert(channel);
+  assert(channel.isText());
+  for await (const message of getAllMessages(channel)) {
+    const { author, content } = message;
+    console.log(`${author.tag} sent "${content}"`);
+  }
 });
 
 client.on("messageCreate", (message: Message) => {

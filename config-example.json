@@ -1,3 +1,5 @@
 {
-  "token": "your-token-goes-here"
+  "token": "your-token-goes-here",
+  "guildId": "777777777777777777",
+  "channelId": "777777777777777777"
 }
