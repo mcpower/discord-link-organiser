@@ -15,6 +15,8 @@
     // Needed for ts-morph
     "declaration": true,
 
+    "importHelpers": true,
+
     "forceConsistentCasingInFileNames": true
   },
   "include": ["index.ts", "src/**/*.ts"]
