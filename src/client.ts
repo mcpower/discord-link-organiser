@@ -1,5 +1,12 @@
 import process from "process";
-import { Client, Intents, Message } from "discord.js";
+import {
+  Client,
+  Collection,
+  Intents,
+  Message,
+  Snowflake,
+  TextChannel,
+} from "discord.js";
 import { token } from "./config";
 
 // Create a new client instance
@@ -16,6 +23,41 @@ client.on("messageCreate", (message: Message) => {
   const { member, content } = message;
   console.log(`Received "${content}" from ${member?.user.tag}`);
 });
+
+// TODO: change this to 100
+const MAX_MESSAGES_PER_FETCH = 2;
+
+async function* getAllMessages(channel: TextChannel) {
+  let lastSeen: Snowflake | undefined = undefined;
+  while (true) {
+    const messages: Collection<Snowflake, Message> =
+      await channel.messages.fetch({
+        limit: MAX_MESSAGES_PER_FETCH,
+        before: lastSeen,
+      });
+    // Discord doesn't guarantee any order for these messages...
+    // https://discord.com/developers/docs/resources/channel#get-channel-messages
+    // Sort from highest ID to lowest.
+    messages.sort((_a, _b, a, b) => {
+      const an = BigInt(a);
+      const bn = BigInt(b);
+      if (an < bn) {
+        return -1;
+      } else if (an > bn) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+    yield* messages.values();
+    const wtf = messages.last();
+    if (wtf) {
+      lastSeen = wtf.id;
+    } else {
+      break;
+    }
+  }
+}
 
 function ignoreAllErrors() {
   client.on("error", console.error);
