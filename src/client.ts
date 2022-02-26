@@ -1,11 +1,11 @@
 import process from "process";
 import {
+  BaseGuildTextChannel,
   Client,
   Collection,
   Intents,
   Message,
   Snowflake,
-  TextChannel,
 } from "discord.js";
 import { token } from "./config";
 
@@ -24,10 +24,9 @@ client.on("messageCreate", (message: Message) => {
   console.log(`Received "${content}" from ${member?.user.tag}`);
 });
 
-// TODO: change this to 100
-const MAX_MESSAGES_PER_FETCH = 2;
+const MAX_MESSAGES_PER_FETCH = 100;
 
-async function* getAllMessages(channel: TextChannel) {
+async function* getAllMessages(channel: BaseGuildTextChannel) {
   let lastSeen: Snowflake | undefined = undefined;
   while (true) {
     const messages: Collection<Snowflake, Message> =
@@ -41,10 +40,11 @@ async function* getAllMessages(channel: TextChannel) {
     messages.sort((_a, _b, a, b) => {
       const an = BigInt(a);
       const bn = BigInt(b);
+      // The below is intentionally reversed to get highest ID to lowest.
       if (an < bn) {
-        return -1;
-      } else if (an > bn) {
         return 1;
+      } else if (an > bn) {
+        return -1;
       } else {
         return 0;
       }
