@@ -9,7 +9,7 @@ client.once("ready", () => {
   console.log("Ready!");
 });
 
-export function run() {
+export async function run(): Promise<void> {
   // Login to Discord with your client's token
-  client.login(token);
+  await client.login(token);
 }
