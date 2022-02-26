@@ -10,6 +10,11 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
 
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    // Needed for ts-morph
+    "declaration": true,
+
     "forceConsistentCasingInFileNames": true
   },
   "include": ["index.ts", "src/**/*.ts"]
