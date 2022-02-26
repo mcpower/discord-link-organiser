@@ -1,3 +1,13 @@
-import process from 'process';
+import { Client, Intents } from 'discord.js';
+import { token } from './config.json';
 
-console.log(`Hello from Node ${process.version}`);
+// Create a new client instance
+const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+
+// When the client is ready, run this code (only once)
+client.once('ready', () => {
+	console.log('Ready!');
+});
+
+// Login to Discord with your client's token
+client.login(token);
