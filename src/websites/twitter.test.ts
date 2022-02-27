@@ -17,6 +17,10 @@ describe("toTwitter", () => {
     const girl =
       "https://twitter.com/WD0706/status/14808721166604943380000000000";
     expect(() => toTwitter(new URL(girl))).toThrow();
+
+    const otherFormatGirl =
+      "https://twitter.com/i/web/status/14808721166604943380000000000";
+    expect(() => toTwitter(new URL(otherFormatGirl))).toThrow();
   });
 
   test("rejects other URLs", () => {
@@ -26,5 +30,13 @@ describe("toTwitter", () => {
 
     expect(toTwitter(new URL(pixivLink))).toBeUndefined();
     expect(toTwitter(new URL(stackOverflowLink))).toBeUndefined();
+  });
+
+  test("rejects other twitter URLs", () => {
+    const homePage = "https://twitter.com";
+    const myProfile = "https://twitter.com/mcpowr";
+
+    expect(toTwitter(new URL(homePage))).toBeUndefined();
+    expect(toTwitter(new URL(myProfile))).toBeUndefined();
   });
 });
