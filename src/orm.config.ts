@@ -8,6 +8,10 @@ const config: Options<SqliteDriver> | Configuration<SqliteDriver> = {
   entities: Object.values(entities),
   dbName: "db.sqlite",
   type: "sqlite",
+  migrations: {
+    path: "./build/src/migrations",
+    pathTs: "./src/migrations",
+  },
 };
 
 export default config;
