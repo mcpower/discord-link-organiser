@@ -9,20 +9,7 @@ import {
 } from "discord.js";
 import { channelId, guildId, token } from "./config";
 import assert from "assert";
-
-function compareBigints(a: string, b: string) {
-  const lengths = a.length - b.length;
-  if (lengths !== 0) {
-    return lengths;
-  }
-  if (a > b) {
-    return 1;
-  } else if (a < b) {
-    return -1;
-  } else {
-    return 0;
-  }
-}
+import { compareBigints } from "./utils";
 
 // Create a new client instance
 const client = new Client({
