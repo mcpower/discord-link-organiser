@@ -10,6 +10,20 @@ import {
 import { channelId, guildId, token } from "./config";
 import assert from "assert";
 
+function compareBigints(a: string, b: string) {
+  const lengths = a.length - b.length;
+  if (lengths !== 0) {
+    return lengths;
+  }
+  if (a > b) {
+    return 1;
+  } else if (a < b) {
+    return -1;
+  } else {
+    return 0;
+  }
+}
+
 // Create a new client instance
 const client = new Client({
   intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
@@ -47,16 +61,7 @@ async function* getAllMessages(channel: BaseGuildTextChannel) {
     // https://discord.com/developers/docs/resources/channel#get-channel-messages
     // Sort from highest ID to lowest.
     messages.sort((_a, _b, a, b) => {
-      const an = BigInt(a);
-      const bn = BigInt(b);
-      // The below is intentionally reversed to get highest ID to lowest.
-      if (an < bn) {
-        return 1;
-      } else if (an > bn) {
-        return -1;
-      } else {
-        return 0;
-      }
+      return -compareBigints(a, b);
     });
     yield* messages.values();
     const wtf = messages.last();
