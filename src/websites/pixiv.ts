@@ -15,7 +15,7 @@ export function toPixiv(url: URL): string | undefined {
 
   const match = url.pathname.match(PATH_REGEX);
   if (match !== null) {
-    id = match[0];
+    id = match[1];
   }
 
   if (url.pathname.startsWith(OLD_PIXIV_PATH)) {
