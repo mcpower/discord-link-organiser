@@ -13,6 +13,12 @@ describe("toTwitter", () => {
     expect(toTwitter(new URL(girl))).toBe("1480872116660494338");
   });
 
+  test("works when copying the URL after expanding an embed", () => {
+    const photo =
+      "https://twitter.com/WD0706/status/1480872116660494338/photo/1";
+    expect(toTwitter(new URL(photo))).toBe("1480872116660494338");
+  });
+
   test("throws when id is too big", () => {
     const girl =
       "https://twitter.com/WD0706/status/14808721166604943380000000000";

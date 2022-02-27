@@ -2,7 +2,7 @@ import { compareBigints, MAX_SQL_INT } from "../utils";
 
 const HOSTS = ["twitter.com", "www.twitter.com"];
 const PATH_REGEXES = [
-  /^\/[^/]*\/status\/(\d+)\/?$/,
+  /^\/[^/]*\/status\/(\d+)(?:\/photo\/\d+)?\/?$/,
   /^\/i\/web\/status\/(\d+)\/?$/,
 ];
 
