@@ -7,6 +7,11 @@ describe("toPixiv", () => {
     expect(toPixiv(new URL(girl))).toBe("66458540");
   });
 
+  test("works with a non-English link", () => {
+    const girl = "https://www.pixiv.net/artworks/66458540";
+    expect(toPixiv(new URL(girl))).toBe("66458540");
+  });
+
   test("works with the old URL format", () => {
     const girl =
       "http://www.pixiv.net/member_illust.php?mode=medium&illust_id=66458540";
@@ -29,5 +34,13 @@ describe("toPixiv", () => {
 
     expect(toPixiv(new URL(twitterLink))).toBeUndefined();
     expect(toPixiv(new URL(stackOverflowLink))).toBeUndefined();
+  });
+
+  test("rejects other pixiv URLs", () => {
+    const homePage = "https://www.pixiv.net/";
+    const artist = "https://www.pixiv.net/en/users/2622803";
+
+    expect(toPixiv(new URL(homePage))).toBeUndefined();
+    expect(toPixiv(new URL(artist))).toBeUndefined();
   });
 });
