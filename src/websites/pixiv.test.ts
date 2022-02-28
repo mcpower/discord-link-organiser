@@ -43,4 +43,16 @@ describe("toPixiv", () => {
     expect(toPixiv(new URL(homePage))).toBeUndefined();
     expect(toPixiv(new URL(artist))).toBeUndefined();
   });
+
+  test("rejects old format when id is invalid", () => {
+    const missingIllustId =
+      "http://www.pixiv.net/member_illust.php?mode=medium";
+    expect(toPixiv(new URL(missingIllustId))).toBeUndefined();
+    const emptyIllustId =
+      "http://www.pixiv.net/member_illust.php?mode=medium&illust_id=";
+    expect(toPixiv(new URL(emptyIllustId))).toBeUndefined();
+    const illustIdWithLetters =
+      "http://www.pixiv.net/member_illust.php?mode=medium&illust_id=abc123";
+    expect(toPixiv(new URL(illustIdWithLetters))).toBeUndefined();
+  });
 });
