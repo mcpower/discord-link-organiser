@@ -9,7 +9,7 @@ import {
   Property,
   Reference,
 } from "@mikro-orm/core";
-import { Post } from ".";
+import { Message } from ".";
 
 // Uses (post, URL) as a primary key. If a post has two identical URLs, "merge"
 // them into one.
@@ -18,20 +18,20 @@ import { Post } from ".";
 @Index({ properties: ["url", "channel"] })
 export class Link {
   @ManyToOne({ primary: true })
-  post: IdentifiedReference<Post>;
+  message: IdentifiedReference<Message>;
 
   @PrimaryKey()
   url: string;
 
-  // Denormalised. Should be equivalent to post.channel.
+  // Denormalised. Should be equivalent to message.channel.
   @Property({ type: BigIntType })
   channel: string;
 
   // this is needed for proper type checks in `FilterQuery`
   [PrimaryKeyType]?: [string, string];
 
-  constructor(post: Post, url: string, channel: string) {
-    this.post = Reference.create(post);
+  constructor(message: Message, url: string, channel: string) {
+    this.message = Reference.create(message);
     this.url = url;
     this.channel = channel;
   }
