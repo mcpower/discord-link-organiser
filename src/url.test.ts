@@ -67,4 +67,12 @@ describe("urlsAndCommentFromMessage", () => {
     expect(links).toHaveLength(0);
     expect(comment).toBe("hello world");
   });
+
+  test("works with invalid URLs", () => {
+    const evil = "lol http://1000.1000.1000.1000/ >:D";
+    expect(() => parseMessage(evil)).not.toThrow();
+    const { comment, links } = parseMessage(evil);
+    expect(comment).toBe(evil);
+    expect(links).toHaveLength(0);
+  });
 });

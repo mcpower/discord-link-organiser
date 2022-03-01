@@ -13,16 +13,27 @@ interface MessageLink {
 }
 
 export function parseMessage(message: string): MessageContents {
-  const urls = [...message.matchAll(URL_REGEX)].map(
-    (match) => new URL(match[0])
-  );
-  if (urls.length === 0) {
-    return { comment: message.trim(), links: [] };
+  const urls: URL[] = [];
+  const parts: string[] = [];
+  // current position in message
+  let i = 0;
+  for (const match of message.matchAll(URL_REGEX)) {
+    const urlText = match[0];
+    try {
+      urls.push(new URL(urlText));
+    } catch (e: unknown) {
+      // bad URL - continue onto next match
+      continue;
+    }
+    assert(match.index !== undefined);
+    // the non-URL part of the message before this URL
+    const previousPart = message.substring(i, match.index).trim();
+    parts.push(previousPart);
+    i = match.index + urlText.length;
   }
-
-  const [comment, ...extras] = message
-    .split(URL_REGEX)
-    .map((part) => part.trim());
+  // push the last part of the message on
+  parts.push(message.substring(i).trim());
+  const [comment, ...extras] = parts;
   assert(
     extras.length === urls.length,
     `mismatched lengths for ${JSON.stringify(message)}`
@@ -31,6 +42,5 @@ export function parseMessage(message: string): MessageContents {
     url,
     extra: extras[i],
   }));
-
   return { comment, links };
 }
