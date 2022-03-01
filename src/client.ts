@@ -24,8 +24,8 @@ client.once("ready", async (client) => {
   assert(channel);
   assert(channel.isText());
   for await (const message of getAllMessages(channel)) {
-    const { author, content } = message;
-    console.log(`${author.tag} sent "${content}"`);
+    const { author, content, type } = message;
+    console.log(`${author.tag} sent "${content}" (${type})`);
   }
 });
 
