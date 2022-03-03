@@ -1,15 +1,9 @@
 import process from "process";
-import {
-  BaseGuildTextChannel,
-  Client,
-  Collection,
-  Intents,
-  Message,
-  Snowflake,
-} from "discord.js";
-import { channelId, guildId, token } from "./config";
+import { Client, Intents, Message } from "discord.js";
+import { channelId, guildId, token } from "../config";
 import assert from "assert";
-import { compareBigints } from "./utils";
+import { parseMessage } from "../url";
+import { getAllMessages } from "./lib";
 
 // Create a new client instance
 const client = new Client({
@@ -26,6 +20,7 @@ client.once("ready", async (client) => {
   for await (const message of getAllMessages(channel)) {
     const { author, content, type } = message;
     console.log(`${author.tag} sent "${content}" (${type})`);
+    console.log(parseMessage(content));
   }
 });
 
@@ -33,32 +28,6 @@ client.on("messageCreate", (message: Message) => {
   const { member, content } = message;
   console.log(`Received "${content}" from ${member?.user.tag}`);
 });
-
-const MAX_MESSAGES_PER_FETCH = 100;
-
-async function* getAllMessages(channel: BaseGuildTextChannel) {
-  let lastSeen: Snowflake | undefined = undefined;
-  while (true) {
-    const messages: Collection<Snowflake, Message> =
-      await channel.messages.fetch({
-        limit: MAX_MESSAGES_PER_FETCH,
-        before: lastSeen,
-      });
-    // Discord doesn't guarantee any order for these messages...
-    // https://discord.com/developers/docs/resources/channel#get-channel-messages
-    // Sort from highest ID to lowest.
-    messages.sort((_a, _b, a, b) => {
-      return -compareBigints(a, b);
-    });
-    yield* messages.values();
-    const wtf = messages.last();
-    if (wtf) {
-      lastSeen = wtf.id;
-    } else {
-      break;
-    }
-  }
-}
 
 function ignoreAllErrors() {
   client.on("error", console.error);

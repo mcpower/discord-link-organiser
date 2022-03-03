@@ -1,4 +1,4 @@
-import { run } from "./src/client";
+import { run } from "./src/discord/client";
 import "./src/orm"; // temporary
 
 run();
