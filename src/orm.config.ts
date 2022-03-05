@@ -13,6 +13,8 @@ const config: Options<BetterSqliteDriver> | Configuration<BetterSqliteDriver> =
       path: "./build/src/migrations",
       pathTs: "./src/migrations",
     },
+    forceUndefined: true,
+    debug: true,
   };
 
 export default config;
