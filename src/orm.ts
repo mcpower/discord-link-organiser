@@ -8,3 +8,5 @@ export async function getEm() {
   const orm = await ormPromise;
   return orm.em.fork();
 }
+
+export type EM = Awaited<ReturnType<typeof getEm>>;

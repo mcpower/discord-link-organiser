@@ -1,29 +1,50 @@
 import {
-  BigIntType,
   Collection,
   Entity,
   Index,
-  ManyToMany,
   OneToMany,
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
 import { Link, PixivLink, TwitterLink } from ".";
+import { EM } from "../orm";
+import { IMessage } from "../types";
+import { parseMessage } from "../url";
 
 @Entity()
-@Index({ properties: ["id", "channel"] }) // Used for max(id) given channel
+@Index({
+  name: "message_channel_id_index",
+  expression:
+    "create index `message_channel_id_index` on `message` " +
+    "(`channel`, cast(`id` as bigint))",
+}) // Used for max(id) given channel
 export class Message {
   // Discord post snowflake
-  @PrimaryKey({ type: BigIntType, autoincrement: false })
+  @PrimaryKey({ autoincrement: false })
   id: string;
 
   // Discord channel snowflake
-  @Property({ type: BigIntType })
+  @Property()
   channel: string;
 
   // Discord user snowflake
-  @Property({ type: BigIntType })
+  @Property()
   author: string;
+
+  @Property()
+  created: number;
+
+  @Property()
+  edited?: number;
+
+  @Property()
+  content: string;
+
+  @Property()
+  attachments: number;
+
+  @Property()
+  comment: string;
 
   @OneToMany(() => Link, (link) => link.message)
   links = new Collection<Link>(this);
@@ -34,9 +55,52 @@ export class Message {
   @OneToMany(() => PixivLink, (link) => link.message)
   pixivLinks = new Collection<PixivLink>(this);
 
-  constructor(id: string, channel: string, author: string) {
+  constructor({
+    id,
+    channel,
+    author,
+    content,
+    attachments,
+    created,
+    edited,
+  }: IMessage) {
     this.id = id;
     this.channel = channel;
     this.author = author;
+    this.created = created;
+    this.edited = edited;
+    this.content = content;
+    this.attachments = attachments;
+    this.comment = "";
+  }
+
+  populateLinks() {
+    const { comment, links } = parseMessage(this.content);
+    this.comment = comment;
+    for (const { url } of links) {
+      const twitter = TwitterLink.fromUrl(this, url);
+      if (twitter) {
+        this.twitterLinks.add(twitter);
+        continue;
+      }
+      const pixiv = PixivLink.fromUrl(this, url);
+      if (pixiv) {
+        this.pixivLinks.add(pixiv);
+        continue;
+      }
+      this.links.add(Link.fromUrl(this, url));
+    }
+  }
+
+  static async getLastMessage(channel: string, em: EM): Promise<string> {
+    const test = await em.findOne(Message, { channel });
+    console.log(test);
+    const qb = em.createQueryBuilder(Message);
+    const lastMessage: { id: string } = await qb
+      .select("cast(coalesce(max(cast(id as bigint)), 0) as text) as id")
+      .where({ channel })
+      .execute("get", false);
+    console.log("lastMessage: ", lastMessage);
+    return lastMessage.id;
   }
 }
