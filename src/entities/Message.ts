@@ -104,7 +104,7 @@ export class Message {
     console.log(test);
     const qb = em.createQueryBuilder(Message);
     const lastMessage: { id: string } = await qb
-      .select("cast(coalesce(max(cast(id as bigint)), 0) as text) as id")
+      .select("cast(coalesce(max(cast(`id` as bigint)), 0) as text) as `id`")
       .where({ channel })
       .execute("get", false);
     console.log("lastMessage: ", lastMessage);
