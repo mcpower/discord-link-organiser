@@ -12,7 +12,7 @@ import {
 } from "@mikro-orm/core";
 import { Message } from ".";
 import { EM } from "../orm";
-import { toTwitter } from "../websites/twitter";
+import { parseTwitterUrl } from "../websites/twitter";
 
 // Uses (post, Twitter ID) as a primary key. If a post has two identical tweets,
 // "merge" them into one.
@@ -41,7 +41,7 @@ export class TwitterLink {
   }
 
   static fromUrl(message: Message, url: URL): TwitterLink | undefined {
-    const twitterId = toTwitter(url);
+    const twitterId = parseTwitterUrl(url);
     if (twitterId === undefined) {
       return undefined;
     }

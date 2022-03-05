@@ -12,7 +12,7 @@ import {
 } from "@mikro-orm/core";
 import { Message } from ".";
 import { EM } from "../orm";
-import { toPixiv } from "../websites/pixiv";
+import { parsePixivUrl } from "../websites/pixiv";
 
 // Uses (post, Pixiv ID) as a primary key. If a post has two identical tweets,
 // "merge" them into one.
@@ -43,7 +43,7 @@ export class PixivLink {
   }
 
   static fromUrl(message: Message, url: URL): PixivLink | undefined {
-    const pixivId = toPixiv(url);
+    const pixivId = parsePixivUrl(url);
     if (pixivId === undefined) {
       return undefined;
     }

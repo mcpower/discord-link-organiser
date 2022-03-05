@@ -6,7 +6,7 @@ const PATH_REGEXES = [
   /^\/i\/web\/status\/(\d+)\/?$/,
 ];
 
-export function toTwitter(url: URL): string | undefined {
+export function parseTwitterUrl(url: URL): string | undefined {
   if (!HOSTS.includes(url.hostname)) {
     return undefined;
   }

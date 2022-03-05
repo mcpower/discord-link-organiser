@@ -6,7 +6,7 @@ const OLD_PIXIV_PATH = "/member_illust.php";
 const OLD_PIXIV_PARAM = "illust_id";
 const POSITIVE_NUMBER_REGEX = /^\d+$/;
 
-export function toPixiv(url: URL): string | undefined {
+export function parsePixivUrl(url: URL): string | undefined {
   if (!HOSTS.includes(url.hostname)) {
     return undefined;
   }

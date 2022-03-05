@@ -1,30 +1,30 @@
 import { describe, expect, test } from "@jest/globals";
-import { toPixiv } from "./pixiv";
+import { parsePixivUrl } from "./pixiv";
 
-describe("toPixiv", () => {
+describe("parsePixivUrl", () => {
   test("works with a random pixiv link", () => {
     const girl = "https://www.pixiv.net/en/artworks/66458540";
-    expect(toPixiv(new URL(girl))).toBe("66458540");
+    expect(parsePixivUrl(new URL(girl))).toBe("66458540");
   });
 
   test("works with a non-English link", () => {
     const girl = "https://www.pixiv.net/artworks/66458540";
-    expect(toPixiv(new URL(girl))).toBe("66458540");
+    expect(parsePixivUrl(new URL(girl))).toBe("66458540");
   });
 
   test("works with the old URL format", () => {
     const girl =
       "http://www.pixiv.net/member_illust.php?mode=medium&illust_id=66458540";
-    expect(toPixiv(new URL(girl))).toBe("66458540");
+    expect(parsePixivUrl(new URL(girl))).toBe("66458540");
   });
 
   test("throws when id is too big", () => {
     const girl = "https://www.pixiv.net/en/artworks/6645854000000000000000";
-    expect(() => toPixiv(new URL(girl))).toThrow();
+    expect(() => parsePixivUrl(new URL(girl))).toThrow();
 
     const otherFormatGirl =
       "http://www.pixiv.net/member_illust.php?mode=medium&illust_id=6645854000000000000000";
-    expect(() => toPixiv(new URL(otherFormatGirl))).toThrow();
+    expect(() => parsePixivUrl(new URL(otherFormatGirl))).toThrow();
   });
 
   test("rejects other URLs", () => {
@@ -32,27 +32,27 @@ describe("toPixiv", () => {
     const stackOverflowLink =
       "https://stackoverflow.com/questions/57660050/why-is-1-32-equal-to-1-in-javascript";
 
-    expect(toPixiv(new URL(twitterLink))).toBeUndefined();
-    expect(toPixiv(new URL(stackOverflowLink))).toBeUndefined();
+    expect(parsePixivUrl(new URL(twitterLink))).toBeUndefined();
+    expect(parsePixivUrl(new URL(stackOverflowLink))).toBeUndefined();
   });
 
   test("rejects other pixiv URLs", () => {
     const homePage = "https://www.pixiv.net/";
     const artist = "https://www.pixiv.net/en/users/2622803";
 
-    expect(toPixiv(new URL(homePage))).toBeUndefined();
-    expect(toPixiv(new URL(artist))).toBeUndefined();
+    expect(parsePixivUrl(new URL(homePage))).toBeUndefined();
+    expect(parsePixivUrl(new URL(artist))).toBeUndefined();
   });
 
   test("rejects old format when id is invalid", () => {
     const missingIllustId =
       "http://www.pixiv.net/member_illust.php?mode=medium";
-    expect(toPixiv(new URL(missingIllustId))).toBeUndefined();
+    expect(parsePixivUrl(new URL(missingIllustId))).toBeUndefined();
     const emptyIllustId =
       "http://www.pixiv.net/member_illust.php?mode=medium&illust_id=";
-    expect(toPixiv(new URL(emptyIllustId))).toBeUndefined();
+    expect(parsePixivUrl(new URL(emptyIllustId))).toBeUndefined();
     const illustIdWithLetters =
       "http://www.pixiv.net/member_illust.php?mode=medium&illust_id=abc123";
-    expect(toPixiv(new URL(illustIdWithLetters))).toBeUndefined();
+    expect(parsePixivUrl(new URL(illustIdWithLetters))).toBeUndefined();
   });
 });
