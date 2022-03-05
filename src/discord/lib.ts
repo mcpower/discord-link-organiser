@@ -4,9 +4,31 @@ import {
   Message,
   Snowflake,
 } from "discord.js";
+import { Message as DbMessage } from "../entities";
 import { compareBigints } from "../utils";
 
 const MAX_MESSAGES_PER_FETCH = 100;
+
+export function toDbMessage(message: Message): DbMessage {
+  const {
+    id,
+    channelId,
+    author,
+    content,
+    attachments,
+    createdTimestamp,
+    editedTimestamp,
+  } = message;
+  return new DbMessage({
+    id,
+    channel: channelId,
+    author: author.id,
+    content,
+    attachments: attachments.size,
+    created: createdTimestamp,
+    edited: editedTimestamp === null ? undefined : editedTimestamp,
+  });
+}
 
 /**
  * Gets all messages since a given post.

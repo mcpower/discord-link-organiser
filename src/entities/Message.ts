@@ -8,7 +8,6 @@ import {
 } from "@mikro-orm/core";
 import { Link, PixivLink, TwitterLink } from ".";
 import { EM } from "../orm";
-import { IMessage } from "../types";
 import { parseMessage } from "../url";
 
 @Entity()
@@ -63,7 +62,15 @@ export class Message {
     attachments,
     created,
     edited,
-  }: IMessage) {
+  }: {
+    id: string;
+    channel: string;
+    author: string;
+    content: string;
+    attachments: number;
+    created: number;
+    edited: number | undefined;
+  }) {
     this.id = id;
     this.channel = channel;
     this.author = author;
