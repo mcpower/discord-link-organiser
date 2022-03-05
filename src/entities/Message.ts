@@ -96,14 +96,11 @@ export class Message {
   }
 
   static async getLastMessage(channel: string, em: EM): Promise<string> {
-    const test = await em.findOne(Message, { channel });
-    console.log(test);
     const qb = em.createQueryBuilder(Message);
     const lastMessage: { id: string } = await qb
       .select("cast(coalesce(max(cast(`id` as bigint)), 0) as text) as `id`")
       .where({ channel })
       .execute("get", false);
-    console.log("lastMessage: ", lastMessage);
     return lastMessage.id;
   }
 }
