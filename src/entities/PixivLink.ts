@@ -1,5 +1,6 @@
 import {
   Entity,
+  expr,
   IdentifiedReference,
   Index,
   ManyToOne,
@@ -57,9 +58,8 @@ export class PixivLink {
         message: { $ne: link.message.id },
       },
       {
-        // TODO: this doesn't work due to strings. either cast this to bigint,
-        // or use message send time
-        orderBy: { id: QueryOrder.DESC },
+        // TODO: use coalesce(edited, created) instead of message ID
+        orderBy: { [expr("cast(`message_id` as bigint)")]: QueryOrder.DESC },
       }
     );
 
