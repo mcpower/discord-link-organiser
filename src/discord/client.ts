@@ -2,8 +2,9 @@ import process from "process";
 import { Client, Intents, Message } from "discord.js";
 import { channelId, guildId, token } from "../config";
 import assert from "assert";
-import { parseMessage } from "../url";
-import { getAllMessages } from "./lib";
+import { getAllMessages, toDbMessage } from "./lib";
+import { Message as DbMessage } from "../entities";
+import { getEm } from "../orm";
 
 // Create a new client instance
 const client = new Client({
@@ -12,16 +13,24 @@ const client = new Client({
 
 // When the client is ready, run this code (only once)
 client.once("ready", async (client) => {
+  const em = await getEm();
   console.log(`Logged in as ${client.user.tag}`);
   const guild = await client.guilds.fetch(guildId);
   const channel = await guild.channels.fetch(channelId);
   assert(channel);
   assert(channel.isText());
-  for await (const message of getAllMessages(channel)) {
+  const lastMessage = await DbMessage.getLastMessage(channelId, em);
+  console.log("lastMessage: ", lastMessage);
+  const dbMessages: DbMessage[] = [];
+  for await (const message of getAllMessages(channel, lastMessage)) {
     const { author, content, type } = message;
     console.log(`${author.tag} sent "${content}" (${type})`);
-    console.log(parseMessage(content));
+    const dbMessage = toDbMessage(message);
+    dbMessage.populateLinks();
+    // await em.persistAndFlush(dbMessage);
+    dbMessages.push(dbMessage);
   }
+  await em.persistAndFlush(dbMessages);
 });
 
 client.on("messageCreate", (message: Message) => {
