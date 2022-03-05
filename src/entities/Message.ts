@@ -6,7 +6,7 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import { Link, PixivLink, TwitterLink } from ".";
+import { PixivLink, TwitterLink } from ".";
 import { EM } from "../orm";
 import { parseMessage } from "../url";
 
@@ -44,9 +44,6 @@ export class Message {
 
   @Property()
   comment: string;
-
-  @OneToMany(() => Link, (link) => link.message)
-  links = new Collection<Link>(this);
 
   @OneToMany(() => TwitterLink, (link) => link.message)
   twitterLinks = new Collection<TwitterLink>(this);
@@ -95,7 +92,6 @@ export class Message {
         this.pixivLinks.add(pixiv);
         continue;
       }
-      this.links.add(Link.fromUrl(this, url));
     }
   }
 

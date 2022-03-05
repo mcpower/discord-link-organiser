@@ -4,6 +4,5 @@
 // as Twitter snowflakes are intended to be 63 bits.
 // Solution: store them in the db as (num - 2**63) in 2080.
 export * from "./Message";
-export * from "./Link";
 export * from "./PixivLink";
 export * from "./TwitterLink";
