@@ -5,7 +5,6 @@ import {
   Index,
   ManyToOne,
   PrimaryKey,
-  PrimaryKeyType,
   Property,
   QueryOrder,
   Reference,
