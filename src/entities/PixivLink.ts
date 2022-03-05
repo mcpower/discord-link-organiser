@@ -20,11 +20,15 @@ import { toPixiv } from "../websites/pixiv";
 // Used for "get all posts in channel which sent a link"
 @Index({ properties: ["id", "channel"] })
 export class PixivLink {
-  @ManyToOne({ primary: true })
+  // when it's necessary, add a generic "HasId" on the class
+  @PrimaryKey({ autoincrement: true })
+  id?: number;
+
+  @ManyToOne()
   message: IdentifiedReference<Message>;
 
-  @PrimaryKey()
-  id: string;
+  @Property()
+  pixivId: string;
 
   // TODO: add twitter user
 
@@ -32,28 +36,25 @@ export class PixivLink {
   @Property()
   channel: string;
 
-  // this is needed for proper type checks in `FilterQuery`
-  [PrimaryKeyType]?: [string, string];
-
-  constructor(message: Message, id: string) {
+  constructor(message: Message, pixivId: string) {
     this.message = Reference.create(message);
-    this.id = id;
+    this.pixivId = pixivId;
     this.channel = message.channel;
   }
 
   static fromUrl(message: Message, url: URL): PixivLink | undefined {
-    const id = toPixiv(url);
-    if (id === undefined) {
+    const pixivId = toPixiv(url);
+    if (pixivId === undefined) {
       return undefined;
     }
-    return new PixivLink(message, id);
+    return new PixivLink(message, pixivId);
   }
 
   static async lastPost(link: PixivLink, em: EM): Promise<Message | undefined> {
     const dbLink = await em.findOne(
       PixivLink,
       {
-        id: link.id,
+        pixivId: link.pixivId,
         channel: link.channel,
         message: { $ne: link.message.id },
       },

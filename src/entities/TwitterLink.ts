@@ -18,33 +18,34 @@ import { toTwitter } from "../websites/twitter";
 // "merge" them into one.
 @Entity()
 // Used for "get all posts in channel which sent a link"
-@Index({ properties: ["id", "channel"] })
+@Index({ properties: ["twitterId", "channel"] })
 export class TwitterLink {
-  @ManyToOne({ primary: true })
+  // when it's necessary, add a generic "HasId" on the class
+  @PrimaryKey({ autoincrement: true })
+  id?: number;
+
+  @ManyToOne()
   message: IdentifiedReference<Message>;
 
-  @PrimaryKey()
-  id: string;
+  @Property()
+  twitterId: string;
 
   // Denormalised. Should be equivalent to message.channel.
   @Property()
   channel: string;
 
-  // this is needed for proper type checks in `FilterQuery`
-  [PrimaryKeyType]?: [string, string];
-
-  constructor(message: Message, id: string) {
+  constructor(message: Message, twitterId: string) {
     this.message = Reference.create(message);
-    this.id = id;
+    this.twitterId = twitterId;
     this.channel = message.channel;
   }
 
   static fromUrl(message: Message, url: URL): TwitterLink | undefined {
-    const id = toTwitter(url);
-    if (id === undefined) {
+    const twitterId = toTwitter(url);
+    if (twitterId === undefined) {
       return undefined;
     }
-    return new TwitterLink(message, id);
+    return new TwitterLink(message, twitterId);
   }
 
   static async lastPost(
@@ -54,7 +55,7 @@ export class TwitterLink {
     const dbLink = await em.findOne(
       TwitterLink,
       {
-        id: link.id,
+        twitterId: link.twitterId,
         channel: link.channel,
         message: { $ne: link.message.id },
       },
