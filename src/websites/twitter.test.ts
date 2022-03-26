@@ -13,6 +13,11 @@ describe("parseTwitterUrl", () => {
     expect(parseTwitterUrl(new URL(girl))).toBe("1480872116660494338");
   });
 
+  test("works with mobile URLs", () => {
+    const girl = "https://mobile.twitter.com/WD0706/status/1480872116660494338";
+    expect(parseTwitterUrl(new URL(girl))).toBe("1480872116660494338");
+  });
+
   test("works when copying the URL after expanding an embed", () => {
     const photo =
       "https://twitter.com/WD0706/status/1480872116660494338/photo/1";
