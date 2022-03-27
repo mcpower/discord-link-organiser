@@ -5,6 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "start": "ts-node index.ts",
+    "debug": "node -r ts-node/register --inspect index.ts",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx; prettier --check .",
     "format": "prettier --write .",
     "test": "jest"
