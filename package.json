@@ -4,9 +4,7 @@
   "description": "discord link organiser",
   "main": "build/index.js",
   "scripts": {
-    "start": "node build/index.js",
-    "build": "tsc",
-    "build-watch": "tsc --watch",
+    "start": "ts-node index.ts",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx; prettier --check .",
     "format": "prettier --write .",
     "test": "jest"
@@ -25,7 +23,6 @@
     "eslint-config-prettier": "^8.4.0",
     "jest": "^27.5.1",
     "prettier": "^2.5.1",
-    "ts-node": "^10.6.0",
     "typescript": "^4.5.5"
   },
   "dependencies": {
@@ -36,6 +33,7 @@
     "bufferutil": "^4.0.6",
     "discord.js": "^13.6.0",
     "erlpack": "github:discord/erlpack",
+    "ts-node": "^10.7.0",
     "tslib": "^2.3.1",
     "utf-8-validate": "^5.0.8",
     "zlib-sync": "^0.1.7"
