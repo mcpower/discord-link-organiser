@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "author": "mcpower",
+  "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.17.8",
     "@babel/preset-env": "^7.16.11",

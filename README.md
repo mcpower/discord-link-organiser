@@ -38,3 +38,9 @@ Most of these things haven't even been implemented yet...
 
     - TODO: fix this by retrieving the "original message" to see if it wasn't
       deleted or edited since the bot last looked at it.
+
+## License
+
+I don't see why anyone would use this code... but if you really want to, this is
+licensed under the MIT license (IANAL but basically "include the license text if
+you use this")
