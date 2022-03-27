@@ -9,4 +9,8 @@ export async function getEm() {
   return orm.em.fork();
 }
 
+export async function getOrm() {
+  return ormPromise;
+}
+
 export type EM = Awaited<ReturnType<typeof getEm>>;
