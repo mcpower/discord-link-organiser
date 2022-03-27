@@ -5,8 +5,8 @@ describe("urlsAndCommentFromMessage", () => {
   test("works with a single URL", () => {
     const { comment, links } = parseMessage("https://google.com");
     expect(links).toHaveLength(1);
-    expect(links[0].url.toString()).toBe("https://google.com/");
-    expect(links[0].extra).toBe("");
+    expect(links[0]?.url.toString()).toBe("https://google.com/");
+    expect(links[0]?.extra).toBe("");
     expect(comment).toBe("");
   });
 
@@ -15,10 +15,10 @@ describe("urlsAndCommentFromMessage", () => {
       "(via Lily) https://twitter.com/sabasabaflash/status/1487712193449639942"
     );
     expect(links).toHaveLength(1);
-    expect(links[0].url.toString()).toBe(
+    expect(links[0]?.url.toString()).toBe(
       "https://twitter.com/sabasabaflash/status/1487712193449639942"
     );
-    expect(links[0].extra).toBe("");
+    expect(links[0]?.extra).toBe("");
     expect(comment).toBe("(via Lily)");
   });
 
@@ -27,12 +27,12 @@ describe("urlsAndCommentFromMessage", () => {
       "https://google.com https://yahoo.com https://bing.com"
     );
     expect(links).toHaveLength(3);
-    expect(links[0].url.toString()).toBe("https://google.com/");
-    expect(links[0].extra).toBe("");
-    expect(links[1].url.toString()).toBe("https://yahoo.com/");
-    expect(links[1].extra).toBe("");
-    expect(links[2].url.toString()).toBe("https://bing.com/");
-    expect(links[2].extra).toBe("");
+    expect(links[0]?.url.toString()).toBe("https://google.com/");
+    expect(links[0]?.extra).toBe("");
+    expect(links[1]?.url.toString()).toBe("https://yahoo.com/");
+    expect(links[1]?.extra).toBe("");
+    expect(links[2]?.url.toString()).toBe("https://bing.com/");
+    expect(links[2]?.extra).toBe("");
     expect(comment).toBe("");
   });
 
@@ -41,12 +41,12 @@ describe("urlsAndCommentFromMessage", () => {
       "search engines https://google.com 1 https://yahoo.com 2 https://bing.com 3"
     );
     expect(links).toHaveLength(3);
-    expect(links[0].url.toString()).toBe("https://google.com/");
-    expect(links[0].extra).toBe("1");
-    expect(links[1].url.toString()).toBe("https://yahoo.com/");
-    expect(links[1].extra).toBe("2");
-    expect(links[2].url.toString()).toBe("https://bing.com/");
-    expect(links[2].extra).toBe("3");
+    expect(links[0]?.url.toString()).toBe("https://google.com/");
+    expect(links[0]?.extra).toBe("1");
+    expect(links[1]?.url.toString()).toBe("https://yahoo.com/");
+    expect(links[1]?.extra).toBe("2");
+    expect(links[2]?.url.toString()).toBe("https://bing.com/");
+    expect(links[2]?.extra).toBe("3");
     expect(comment).toBe("search engines");
   });
 
@@ -55,10 +55,10 @@ describe("urlsAndCommentFromMessage", () => {
       "  (via Lily) https://twitter.com/sabasabaflash/status/1487712193449639942  "
     );
     expect(links).toHaveLength(1);
-    expect(links[0].url.toString()).toBe(
+    expect(links[0]?.url.toString()).toBe(
       "https://twitter.com/sabasabaflash/status/1487712193449639942"
     );
-    expect(links[0].extra).toBe("");
+    expect(links[0]?.extra).toBe("");
     expect(comment).toBe("(via Lily)");
   });
 
