@@ -9,6 +9,15 @@ import { getEm } from "../orm";
 // Create a new client instance
 const client = new Client({
   intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+  // why isn't this the default. enable ALL partials
+  partials: [
+    "USER",
+    "MESSAGE",
+    "CHANNEL",
+    "REACTION",
+    "GUILD_MEMBER",
+    "GUILD_SCHEDULED_EVENT",
+  ],
 });
 
 // When the client is ready, run this code (only once)
@@ -33,9 +42,31 @@ client.once("ready", async (client) => {
   await em.persistAndFlush(dbMessages);
 });
 
-client.on("messageCreate", (message: Message) => {
-  const { member, content } = message;
-  console.log(`Received "${content}" from ${member?.user.tag}`);
+client.on("messageCreate", async (message) => {
+  const { author, content } = message;
+  console.log(`Received "${content}" from ${author.tag}`);
+});
+
+client.on("messageUpdate", async (_oldMessage, newMessage) => {
+  // Inspecting the Discord API, these fields SHOULD exist on newMessage:
+  // attachments, author, channel_id, components, content, edited_timestamp,
+  // embeds, flags, guild_id, id, member, mention_everyone, mention_roles,
+  // mentions, pinned, timestamp, tts, type
+  // However, we should still explicitly fetch the message if we don't have it.
+  const { author, content } = newMessage;
+  console.log(`Edited "${content}" from ${author?.tag}`);
+});
+
+client.on("messageDelete", async (message) => {
+  // Only guild_id, channel_id and id exist here.
+  console.log(`Message ${message.id} deleted`);
+});
+
+client.on("messageDeleteBulk", async (messages) => {
+  for (const message of messages.values()) {
+    // Only guild_id, channel_id and id exist here.
+    console.log(`Message ${message.id} bulk deleted`);
+  }
 });
 
 function ignoreAllErrors() {
