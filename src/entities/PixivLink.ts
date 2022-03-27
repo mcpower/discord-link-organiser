@@ -13,8 +13,6 @@ import { Message } from ".";
 import { EM } from "../orm";
 import { parsePixivUrl } from "../websites/pixiv";
 
-// Uses (post, Pixiv ID) as a primary key. If a post has two identical tweets,
-// "merge" them into one.
 @Entity()
 // Used for "get all posts in channel which sent a link"
 @Index({ properties: ["id", "channel"] })
@@ -28,8 +26,6 @@ export class PixivLink {
 
   @Property()
   pixivId: string;
-
-  // TODO: add twitter user
 
   // Denormalised. Should be equivalent to message.channel.
   @Property()

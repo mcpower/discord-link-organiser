@@ -13,8 +13,6 @@ import { Message } from ".";
 import { EM } from "../orm";
 import { parseTwitterUrl } from "../websites/twitter";
 
-// Uses (post, Twitter ID) as a primary key. If a post has two identical tweets,
-// "merge" them into one.
 @Entity()
 // Used for "get all posts in channel which sent a link"
 @Index({ properties: ["twitterId", "channel"] })
