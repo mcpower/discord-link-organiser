@@ -45,19 +45,21 @@ export class PixivLink {
     return new PixivLink(message, pixivId);
   }
 
-  static async lastPost(link: PixivLink, em: EM): Promise<Message | undefined> {
-    const dbLink = await em.findOne(
-      PixivLink,
-      {
-        pixivId: link.pixivId,
-        channel: link.channel,
-        message: { $ne: link.message.id },
-      },
-      {
-        // TODO: use coalesce(edited, created) instead of message ID
-        orderBy: { [expr("cast(`message_id` as bigint)")]: QueryOrder.DESC },
-      }
-    );
+  async lastPost(em: EM): Promise<Message | undefined> {
+    const qb = em.createQueryBuilder(PixivLink, "t");
+    const dbLink = await qb
+      .select("*")
+      .where({
+        twitterId: this.pixivId,
+        channel: this.channel,
+        message: { $ne: this.message.id },
+      })
+      .leftJoinAndSelect("t.message", "m")
+      .orderBy({
+        [expr("coalesce(`m`.`edited`, `m`.`created`)")]: QueryOrder.DESC,
+      })
+      .limit(1)
+      .getSingleResult();
 
     if (dbLink === null) {
       return undefined;

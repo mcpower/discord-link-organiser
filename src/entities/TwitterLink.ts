@@ -45,22 +45,21 @@ export class TwitterLink {
     return new TwitterLink(message, twitterId);
   }
 
-  static async lastPost(
-    link: TwitterLink,
-    em: EM
-  ): Promise<Message | undefined> {
-    const dbLink = await em.findOne(
-      TwitterLink,
-      {
-        twitterId: link.twitterId,
-        channel: link.channel,
-        message: { $ne: link.message.id },
-      },
-      {
-        // TODO: use coalesce(edited, created) instead of message ID
-        orderBy: { [expr("cast(`message_id` as bigint)")]: QueryOrder.DESC },
-      }
-    );
+  async lastPost(em: EM): Promise<Message | undefined> {
+    const qb = em.createQueryBuilder(TwitterLink, "t");
+    const dbLink = await qb
+      .select("*")
+      .where({
+        twitterId: this.twitterId,
+        channel: this.channel,
+        message: { $ne: this.message.id },
+      })
+      .leftJoinAndSelect("t.message", "m")
+      .orderBy({
+        [expr("coalesce(`m`.`edited`, `m`.`created`)")]: QueryOrder.DESC,
+      })
+      .limit(1)
+      .getSingleResult();
 
     if (dbLink === null) {
       return undefined;
