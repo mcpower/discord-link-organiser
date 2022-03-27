@@ -18,7 +18,10 @@ export function parseMessage(message: string): MessageContents {
   // current position in message
   let i = 0;
   for (const match of message.matchAll(URL_REGEX)) {
-    const urlText = match[0];
+    // The match array must have the matched text as the first item.
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/matchAll#return_value
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const urlText = match[0]!;
     try {
       urls.push(new URL(urlText));
     } catch (e: unknown) {
@@ -40,7 +43,12 @@ export function parseMessage(message: string): MessageContents {
   );
   const links = urls.map<MessageLink>((url, i) => ({
     url,
-    extra: extras[i],
+    // extras and urls are guaranteed to have the same length as asserted above.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    extra: extras[i]!,
   }));
-  return { comment, links };
+  // comment is guaranteed to be defined due to having the last portion of the
+  // message be pushed into parts.
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return { comment: comment!, links };
 }
