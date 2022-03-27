@@ -10,6 +10,10 @@ import { PixivLink, TwitterLink } from ".";
 import { EM } from "../orm";
 import { parseMessage } from "../url";
 
+// Store IDs as strings as our ORM can't support 64 bit ints.
+// TODO: In 2080, the ID index and getLastMessage queries will not work. Use
+// manual string-based comparison of numbers instead (first compare length of
+// strings, then compare strings themselves).
 @Entity()
 @Index({
   name: "message_channel_id_index",
