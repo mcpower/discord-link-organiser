@@ -1,6 +1,7 @@
 import process from "process";
 import {
   Client,
+  DiscordAPIError,
   Intents,
   Message,
   PartialMessage,
@@ -10,9 +11,10 @@ import { channelId, guildId, token } from "../config";
 import assert from "assert";
 import { getAllMessages, toDbMessageAndPopulate } from "./lib";
 import { Message as DbMessage } from "../entities";
-import { getEm } from "../orm";
+import { EM, getEm } from "../orm";
 import { delay } from "../utils/delay";
 import { LockQueue } from "../utils/LockQueue";
+import { wrap } from "@mikro-orm/core";
 
 export class GirlsClient {
   client: Client;
@@ -125,28 +127,8 @@ export class GirlsClient {
     console.log(`Received "${content}" from ${author.tag}`);
     const em = await getEm();
     const dbMessage = toDbMessageAndPopulate(message);
-    // We'll need to persist and flush this dbMessage, but we don't care if it's
-    // before or after fetching reposts (as there's a filter in the queries to
-    // prevent getting the same link back).
-    const repostsPromise = dbMessage.fetchReposts(em);
-    const flushPromise = em.persistAndFlush(dbMessage);
-    const reposts = (await Promise.all([repostsPromise, flushPromise]))[0];
-    if (reposts.length > 0) {
-      // Delete and send DM.
-      const deletePromise = message.delete();
-      const author = message.author;
-      const dmPromise = author
-        .send("Your last message had a repost.")
-        .catch(async () => {
-          const repostMessage = await message.channel.send({
-            content: `${author}, your last message had a repost. (I couldn't DM you!)`,
-            allowedMentions: { users: [author.id] },
-          });
-          await delay(3000);
-          await repostMessage.delete();
-        });
-      await Promise.all([deletePromise, dmPromise]);
-    }
+    await em.persistAndFlush(dbMessage);
+    await this.handleReposts(em, message, dbMessage);
   }
 
   async messageUpdate(
@@ -162,8 +144,82 @@ export class GirlsClient {
     // channel_id, embeds, guild_id, id.
     // However, we should still explicitly fetch the message if we don't have
     // it.
-    const { author, content } = newMessage;
-    console.log(`Edited "${content}" from ${author?.tag}`);
+    console.log(
+      `Edited "${newMessage.content}" from ${newMessage.author?.tag}`
+    );
+
+    const em = await getEm();
+    let dbMessage = await em.findOne(DbMessage, newMessage.id);
+    // If we've seen this message before AND nothing interesting was changed,
+    // just update the edited timestamp.
+    if (
+      dbMessage !== null &&
+      (newMessage.content === null || newMessage.content === dbMessage.content)
+    ) {
+      if (newMessage.editedTimestamp) {
+        dbMessage.edited = newMessage.editedTimestamp ?? undefined;
+        await em.flush();
+      }
+      return;
+    }
+
+    // Otherwise, fetch everything and check for reposts.
+    try {
+      newMessage = await newMessage.fetch();
+    } catch (err: unknown) {
+      // The message was probably deleted.
+      // Check for "unknown message" code:
+      // https://discord.com/developers/docs/topics/opcodes-and-status-codes#json-json-error-codes
+      if (err instanceof DiscordAPIError && err.code === 10008) {
+        return;
+      }
+      console.log("Error when trying to fetch message in update:", err);
+      return;
+    }
+
+    const newDbMessage = toDbMessageAndPopulate(newMessage);
+    if (dbMessage === null) {
+      dbMessage = newDbMessage;
+      em.persist(dbMessage);
+    } else {
+      const data = wrap(newDbMessage).toObject();
+      // Initialising the collections is necessary - if this is omitted, the
+      // entities that are loaded below (i.e. old twitterLinks and pixivLinks)
+      // are NOT deleted when the assign is called.
+      await Promise.all([
+        dbMessage.twitterLinks.init(),
+        dbMessage.pixivLinks.init(),
+      ]);
+      // Explicitly setting the collections is necessary, as toObject() doesn't
+      // seem to handle nested objects well and rewrites them as arrays of
+      // undefineds instead of arrays of objects.
+      data.twitterLinks = newDbMessage.twitterLinks.toArray();
+      data.pixivLinks = newDbMessage.pixivLinks.toArray();
+      wrap(dbMessage).assign(data);
+    }
+    await em.flush();
+    await this.handleReposts(em, newMessage, dbMessage);
+  }
+
+  async handleReposts(em: EM, message: Message, dbMessage: DbMessage) {
+    const reposts = await dbMessage.fetchReposts(em);
+    if (reposts.length === 0) {
+      return;
+    }
+    // Delete and send DM.
+    const deletePromise = message.delete();
+    const author = message.author;
+    const dmPromise = author
+      .send("Your last message had a repost.")
+      .catch(async () => {
+        const repostMessage = await message.channel.send({
+          content: `${author}, your last message had a repost. (I couldn't DM you!)`,
+          allowedMentions: { users: [author.id] },
+        });
+        await delay(3000);
+        await repostMessage.delete();
+      });
+    await Promise.all([deletePromise, dmPromise]);
   }
 
   async messageDelete(message: Message | PartialMessage) {
