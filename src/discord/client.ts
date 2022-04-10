@@ -15,6 +15,14 @@ import { getEm } from "../orm";
 
 export class GirlsClient {
   client: Client;
+  /**
+   * Resolved when this.ready() finishes.
+   * Used to prevent races - for example, if a message is sent before ready()
+   * finishes, it could change DbMessage.getLastMessage to be the newest message
+   * instead of an old message, causing this.ready() to fail to fetch older
+   * mesages.
+   */
+  readyPromise: Promise<void>;
 
   constructor() {
     this.client = new Client({
@@ -30,7 +38,17 @@ export class GirlsClient {
       ],
     });
 
-    this.client.once("ready", this.ready.bind(this));
+    let readyPromiseCallback: () => void;
+    // The Promise constructor's function is immediately called, so the above
+    // variable is guaranteed to be initialised after the following statement.
+    this.readyPromise = new Promise((resolve) => {
+      readyPromiseCallback = resolve;
+    });
+
+    this.client.once("ready", async (client) => {
+      await this.ready(client);
+      readyPromiseCallback();
+    });
     this.client.on("messageCreate", this.messageCreate.bind(this));
     this.client.on("messageUpdate", this.messageUpdate.bind(this));
     this.client.on("messageDelete", this.messageDelete.bind(this));
@@ -57,6 +75,7 @@ export class GirlsClient {
   }
 
   async messageCreate(message: Message) {
+    await this.readyPromise;
     const { author, content } = message;
     console.log(`Received "${content}" from ${author.tag}`);
     const em = await getEm();
@@ -89,6 +108,7 @@ export class GirlsClient {
     _oldMessage: Message | PartialMessage,
     newMessage: Message | PartialMessage
   ) {
+    await this.readyPromise;
     // Inspecting the Discord API, these fields SHOULD exist on newMessage:
     // attachments, author, channel_id, components, content, edited_timestamp,
     // embeds, flags, guild_id, id, member, mention_everyone, mention_roles,
@@ -99,6 +119,7 @@ export class GirlsClient {
   }
 
   async messageDelete(message: Message | PartialMessage) {
+    await this.readyPromise;
     // Only guild_id, channel_id and id exist here.
     console.log(`Message ${message.id} deleted`);
     const em = await getEm();
@@ -108,6 +129,7 @@ export class GirlsClient {
   async messageDeleteBulk(
     messages: Collection<Snowflake, Message | PartialMessage>
   ) {
+    // This delegates to messageDelete, which awaits readyPromise for us.
     await Promise.all(messages.map((message) => this.messageDelete(message)));
   }
 
