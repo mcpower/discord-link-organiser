@@ -8,19 +8,21 @@ type AsyncFunction = () => Promise<unknown>;
  * the order that the functions were enqueued.
  */
 export class LockQueue {
-  private isRunning: boolean;
+  /**
+   * If defined, the queue is running and the (promise, resolve) object
+   * represents the finished() Promise and the function to resolve it.
+   */
+  private state: { promise: Promise<void>; resolve: () => void } | undefined;
   private queue: Queue<AsyncFunction>;
-  private finishedCallbacks: (() => void)[];
 
   constructor() {
     this.queue = new Queue();
-    this.isRunning = false;
-    this.finishedCallbacks = [];
+    this.state = undefined;
   }
 
   enqueue(f: AsyncFunction) {
     this.queue.enqueue(f);
-    if (!this.isRunning) {
+    if (!this.state) {
       this.run();
     }
   }
@@ -30,34 +32,28 @@ export class LockQueue {
    * in the queue.
    */
   finished(): Promise<void> {
-    if (!this.isRunning) {
-      return Promise.resolve();
-    } else {
-      return new Promise((resolve) => this.finishedCallbacks.push(resolve));
-    }
+    return this.state ? this.state.promise : Promise.resolve();
   }
 
   private run() {
-    assert(!this.isRunning, "LockQueue shouldn't be running");
     const nextFunction = this.queue.dequeue();
     if (nextFunction === undefined) {
-      // Safety: these callbacks are called synchronously, and all callbacks are
-      // trivial resolve calls, so finishedCallbacks can't be mutated while this
-      // loop is running. Even if there were a caller which would call finished
-      // right after awaiting finished like
-      // `lockQueue.finished().then(() => lockQueue.finished())`, the .then
-      // callback will only be executed on the next microtask flush.
-      for (const callback of this.finishedCallbacks) {
-        callback();
-      }
-      this.finishedCallbacks = [];
+      // Safety: This function is only called from two places: enqueue and
+      // itself. Enqueue guarantees that the queue is non-empty (so this block
+      // never runs if called from enqueue), and if this was called from itself
+      // then this.state is guaranteed to be defined.
+      assert(this.state);
+      this.state.resolve();
+      this.state = undefined;
       return;
     }
-    this.isRunning = true;
+    if (this.state === undefined) {
+      let resolve: (() => void) | undefined = undefined;
+      const promise: Promise<void> = new Promise((r) => (resolve = r));
+      assert(resolve);
+      this.state = { promise, resolve };
+    }
     nextFunction().then(() => {
-      this.isRunning = false;
-      // This will set this.isRunning = true without a microtick in-between
-      // (assuming there's still stuff in the queue).
       this.run();
     });
   }
