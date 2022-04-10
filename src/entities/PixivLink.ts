@@ -45,7 +45,7 @@ export class PixivLink {
     return new PixivLink(message, pixivId);
   }
 
-  async lastPost(em: EM): Promise<Message | undefined> {
+  async lastLink(em: EM): Promise<PixivLink | undefined> {
     const qb = em.createQueryBuilder(PixivLink, "t");
     const dbLink = await qb
       .select("*")
@@ -65,6 +65,6 @@ export class PixivLink {
       return undefined;
     }
 
-    return dbLink.message.load();
+    return dbLink;
   }
 }

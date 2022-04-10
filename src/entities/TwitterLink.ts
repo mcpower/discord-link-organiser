@@ -45,7 +45,7 @@ export class TwitterLink {
     return new TwitterLink(message, twitterId);
   }
 
-  async lastPost(em: EM): Promise<Message | undefined> {
+  async lastLink(em: EM): Promise<TwitterLink | undefined> {
     const qb = em.createQueryBuilder(TwitterLink, "t");
     const dbLink = await qb
       .select("*")
@@ -65,6 +65,6 @@ export class TwitterLink {
       return undefined;
     }
 
-    return dbLink.message.load();
+    return dbLink;
   }
 }
