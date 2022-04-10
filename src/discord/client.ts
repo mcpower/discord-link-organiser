@@ -153,11 +153,15 @@ export class GirlsClient {
     _oldMessage: Message | PartialMessage,
     newMessage: Message | PartialMessage
   ) {
-    // Inspecting the Discord API, these fields SHOULD exist on newMessage:
+    // Inspecting the Discord API, these fields SHOULD exist on newMessage ON A
+    // MANUAL EDIT BY THE USER:
     // attachments, author, channel_id, components, content, edited_timestamp,
     // embeds, flags, guild_id, id, member, mention_everyone, mention_roles,
     // mentions, pinned, timestamp, tts, type
-    // However, we should still explicitly fetch the message if we don't have it.
+    // These fields should exist when an embed is updated:
+    // channel_id, embeds, guild_id, id.
+    // However, we should still explicitly fetch the message if we don't have
+    // it.
     const { author, content } = newMessage;
     console.log(`Edited "${content}" from ${author?.tag}`);
   }
