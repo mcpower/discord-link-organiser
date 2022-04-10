@@ -2,7 +2,7 @@ export class Queue<T> {
   private toPush: T[] = [];
   private currentQueue: T[] = [];
 
-  push(v: T) {
+  enqueue(v: T) {
     this.toPush.push(v);
   }
 
@@ -10,7 +10,7 @@ export class Queue<T> {
     return this.currentQueue[this.currentQueue.length - 1] ?? this.toPush[0];
   }
 
-  pop(): T | undefined {
+  dequeue(): T | undefined {
     const popped = this.currentQueue.pop();
     if (popped !== undefined) {
       return popped;
