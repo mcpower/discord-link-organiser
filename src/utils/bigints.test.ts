@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { compareBigints } from "./utils";
+import { compareBigints } from "./bigints";
 
 const FILLER = "0123456789".repeat(5);
 describe("compareBigints", () => {

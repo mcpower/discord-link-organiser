@@ -5,7 +5,7 @@ import {
   Snowflake,
 } from "discord.js";
 import { Message as DbMessage } from "../entities";
-import { compareBigints } from "../utils";
+import { compareBigints } from "../utils/bigints";
 
 const MAX_MESSAGES_PER_FETCH = 100;
 

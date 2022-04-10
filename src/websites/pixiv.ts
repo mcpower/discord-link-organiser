@@ -1,4 +1,4 @@
-import { compareBigints, MAX_SQL_INT } from "../utils";
+import { compareBigints, MAX_SQL_INT } from "../utils/bigints";
 
 const HOSTS = ["pixiv.net", "www.pixiv.net"];
 const PATH_REGEX = /^\/(?:en\/)?artworks\/(\d+)\/?/;

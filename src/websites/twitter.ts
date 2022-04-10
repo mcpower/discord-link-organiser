@@ -1,4 +1,4 @@
-import { compareBigints, MAX_SQL_INT } from "../utils";
+import { compareBigints, MAX_SQL_INT } from "../utils/bigints";
 
 const HOSTS = ["twitter.com", "www.twitter.com", "mobile.twitter.com"];
 const PATH_REGEXES = [
