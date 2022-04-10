@@ -101,15 +101,14 @@ export class GirlsClient {
   async messageDelete(message: Message | PartialMessage) {
     // Only guild_id, channel_id and id exist here.
     console.log(`Message ${message.id} deleted`);
+    const em = await getEm();
+    await em.nativeDelete(Message, message.id);
   }
 
   async messageDeleteBulk(
     messages: Collection<Snowflake, Message | PartialMessage>
   ) {
-    for (const message of messages.values()) {
-      // Only guild_id, channel_id and id exist here.
-      console.log(`Message ${message.id} bulk deleted`);
-    }
+    await Promise.all(messages.map((message) => this.messageDelete(message)));
   }
 
   ignoreAllErrors() {
