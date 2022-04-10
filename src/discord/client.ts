@@ -12,6 +12,7 @@ import assert from "assert";
 import { getAllMessages, toDbMessageAndPopulate } from "./lib";
 import { Message as DbMessage } from "../entities";
 import { getEm } from "../orm";
+import { delay } from "../utils/delay";
 
 export class GirlsClient {
   client: Client;
@@ -97,7 +98,7 @@ export class GirlsClient {
             content: `${author}, your last message had a repost. (I couldn't DM you!)`,
             allowedMentions: { users: [author.id] },
           });
-          await new Promise((resolve) => setTimeout(resolve, 3000));
+          await delay(3000);
           await repostMessage.delete();
         });
       await Promise.all([deletePromise, dmPromise]);
