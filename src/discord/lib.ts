@@ -30,6 +30,12 @@ export function toDbMessage(message: Message): DbMessage {
   });
 }
 
+export function toDbMessageAndPopulate(message: Message): DbMessage {
+  const dbMessage = toDbMessage(message);
+  dbMessage.populateLinks();
+  return dbMessage;
+}
+
 /**
  * Gets all messages since a given post.
  * @param channel The channel to fetch messages from.

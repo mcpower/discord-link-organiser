@@ -9,7 +9,7 @@ import {
 } from "discord.js";
 import { channelId, guildId, token } from "../config";
 import assert from "assert";
-import { getAllMessages, toDbMessage } from "./lib";
+import { getAllMessages, toDbMessageAndPopulate } from "./lib";
 import { Message as DbMessage } from "../entities";
 import { getEm } from "../orm";
 
@@ -50,9 +50,7 @@ export class GirlsClient {
     for await (const message of getAllMessages(channel, lastMessage)) {
       const { author, content, type } = message;
       console.log(`${author.tag} sent "${content}" (${type})`);
-      const dbMessage = toDbMessage(message);
-      dbMessage.populateLinks();
-      // await em.persistAndFlush(dbMessage);
+      const dbMessage = toDbMessageAndPopulate(message);
       dbMessages.push(dbMessage);
     }
     await em.persistAndFlush(dbMessages);
