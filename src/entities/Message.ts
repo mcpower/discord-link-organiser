@@ -26,6 +26,10 @@ export class Message {
   @PrimaryKey({ autoincrement: false })
   id: string;
 
+  // Discord guild snowflake
+  @Property()
+  guild?: string;
+
   // Discord channel snowflake
   @Property()
   channel: string;
@@ -65,12 +69,14 @@ export class Message {
     id,
     channel,
     author,
+    guild,
     content,
     attachments,
     created,
     edited,
   }: {
     id: string;
+    guild: string | undefined;
     channel: string;
     author: string;
     content: string;
@@ -79,6 +85,7 @@ export class Message {
     edited: number | undefined;
   }) {
     this.id = id;
+    this.guild = guild;
     this.channel = channel;
     this.author = author;
     this.created = created;
@@ -103,6 +110,12 @@ export class Message {
         continue;
       }
     }
+  }
+
+  get url() {
+    // This exceeds 80 chars. Any other way of formatting this is ugly :/
+    // prettier-ignore
+    return `https://discord.com/channels/${this.guild ?? "@me"}/${this.channel}/${this.id}`;
   }
 
   static async getLastMessage(channel: string, em: EM): Promise<string> {

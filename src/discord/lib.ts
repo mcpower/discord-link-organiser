@@ -12,6 +12,7 @@ const MAX_MESSAGES_PER_FETCH = 100;
 export function toDbMessage(message: Message): DbMessage {
   const {
     id,
+    guildId,
     channelId,
     author,
     content,
@@ -21,6 +22,7 @@ export function toDbMessage(message: Message): DbMessage {
   } = message;
   return new DbMessage({
     id,
+    guild: guildId === null ? undefined : guildId,
     channel: channelId,
     author: author.id,
     content,
