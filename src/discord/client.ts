@@ -59,6 +59,30 @@ export class GirlsClient {
   async messageCreate(message: Message) {
     const { author, content } = message;
     console.log(`Received "${content}" from ${author.tag}`);
+    const em = await getEm();
+    const dbMessage = toDbMessageAndPopulate(message);
+    // We'll need to persist and flush this dbMessage, but we don't care if it's
+    // before or after fetching reposts (as there's a filter in the queries to
+    // prevent getting the same link back).
+    const repostsPromise = dbMessage.fetchReposts(em);
+    const flushPromise = em.persistAndFlush(dbMessage);
+    const reposts = (await Promise.all([repostsPromise, flushPromise]))[0];
+    if (reposts.length > 0) {
+      // Delete and send DM.
+      const deletePromise = message.delete();
+      const author = message.author;
+      const dmPromise = author
+        .send("Your last message had a repost.")
+        .catch(async () => {
+          const repostMessage = await message.channel.send({
+            content: `${author}, your last message had a repost. (I couldn't DM you!)`,
+            allowedMentions: { users: [author.id] },
+          });
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          await repostMessage.delete();
+        });
+      await Promise.all([deletePromise, dmPromise]);
+    }
   }
 
   async messageUpdate(
