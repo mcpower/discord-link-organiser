@@ -37,21 +37,27 @@ export class Message {
   @Property()
   created: number;
 
+  // Could change on edit.
   @Property()
   edited?: number;
 
+  // Could change on edit.
   @Property()
   content: string;
 
+  // Could change on edit.
   @Property()
   attachments: number;
 
+  // Based on content.
   @Property()
   comment: string;
 
+  // Based on content.
   @OneToMany(() => TwitterLink, (link) => link.message)
   twitterLinks = new Collection<TwitterLink>(this);
 
+  // Based on content.
   @OneToMany(() => PixivLink, (link) => link.message)
   pixivLinks = new Collection<PixivLink>(this);
 
