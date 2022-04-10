@@ -1,4 +1,5 @@
 import {
+  Cascade,
   Collection,
   Entity,
   Index,
@@ -58,11 +59,21 @@ export class Message {
   comment: string;
 
   // Based on content.
-  @OneToMany(() => TwitterLink, (link) => link.message)
+  @OneToMany({
+    entity: () => TwitterLink,
+    mappedBy: "message",
+    cascade: [Cascade.ALL],
+    orphanRemoval: true,
+  })
   twitterLinks = new Collection<TwitterLink>(this);
 
   // Based on content.
-  @OneToMany(() => PixivLink, (link) => link.message)
+  @OneToMany({
+    entity: () => PixivLink,
+    mappedBy: "message",
+    cascade: [Cascade.ALL],
+    orphanRemoval: true,
+  })
   pixivLinks = new Collection<PixivLink>(this);
 
   constructor({
