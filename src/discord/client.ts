@@ -1,7 +1,6 @@
 import process from "process";
 import {
   Client,
-  Collection,
   Intents,
   Message,
   PartialMessage,
@@ -13,6 +12,7 @@ import { getAllMessages, toDbMessageAndPopulate } from "./lib";
 import { Message as DbMessage } from "../entities";
 import { getEm } from "../orm";
 import { delay } from "../utils/delay";
+import { LockQueue } from "../utils/LockQueue";
 
 export class GirlsClient {
   client: Client;
@@ -24,6 +24,12 @@ export class GirlsClient {
    * mesages.
    */
   readyPromise: Promise<void>;
+  /**
+   * Locks for a given message snowflake.
+   * Used to prevent races which may occur when multiple async functions
+   * relating to the same message run simultaneously.
+   */
+  messageLocks: Map<Snowflake, LockQueue>;
 
   constructor() {
     this.client = new Client({
@@ -38,6 +44,7 @@ export class GirlsClient {
         "GUILD_SCHEDULED_EVENT",
       ],
     });
+    this.messageLocks = new Map();
 
     let readyPromiseCallback: () => void;
     // The Promise constructor's function is immediately called, so the above
@@ -50,10 +57,32 @@ export class GirlsClient {
       await this.ready(client);
       readyPromiseCallback();
     });
-    this.client.on("messageCreate", this.messageCreate.bind(this));
-    this.client.on("messageUpdate", this.messageUpdate.bind(this));
-    this.client.on("messageDelete", this.messageDelete.bind(this));
-    this.client.on("messageDeleteBulk", this.messageDeleteBulk.bind(this));
+    this.client.on("messageCreate", (message) => {
+      this.ensureUnlocked(message.id, () => this.messageCreate(message));
+    });
+    this.client.on("messageUpdate", (oldMessage, newMessage) => {
+      this.ensureUnlocked(newMessage.id, () =>
+        this.messageUpdate(oldMessage, newMessage)
+      );
+    });
+    this.client.on("messageDelete", (message) => {
+      this.ensureUnlocked(message.id, () => this.messageDelete(message));
+    });
+    this.client.on("messageDeleteBulk", (messages) => {
+      for (const message of messages.values()) {
+        this.ensureUnlocked(message.id, () => this.messageDelete(message));
+      }
+    });
+  }
+
+  async ensureUnlocked(messageId: Snowflake, callback: () => Promise<unknown>) {
+    let lock = this.messageLocks.get(messageId);
+    if (!lock) {
+      lock = new LockQueue();
+      this.messageLocks.set(messageId, lock);
+      lock.finished().then(() => this.messageLocks.delete(messageId));
+    }
+    lock.enqueue(callback);
   }
 
   async ready(client: Client<true>) {
@@ -76,7 +105,6 @@ export class GirlsClient {
   }
 
   async messageCreate(message: Message) {
-    await this.readyPromise;
     const { author, content } = message;
     console.log(`Received "${content}" from ${author.tag}`);
     const em = await getEm();
@@ -109,7 +137,6 @@ export class GirlsClient {
     _oldMessage: Message | PartialMessage,
     newMessage: Message | PartialMessage
   ) {
-    await this.readyPromise;
     // Inspecting the Discord API, these fields SHOULD exist on newMessage:
     // attachments, author, channel_id, components, content, edited_timestamp,
     // embeds, flags, guild_id, id, member, mention_everyone, mention_roles,
@@ -120,18 +147,10 @@ export class GirlsClient {
   }
 
   async messageDelete(message: Message | PartialMessage) {
-    await this.readyPromise;
     // Only guild_id, channel_id and id exist here.
     console.log(`Message ${message.id} deleted`);
     const em = await getEm();
     await em.nativeDelete(Message, message.id);
-  }
-
-  async messageDeleteBulk(
-    messages: Collection<Snowflake, Message | PartialMessage>
-  ) {
-    // This delegates to messageDelete, which awaits readyPromise for us.
-    await Promise.all(messages.map((message) => this.messageDelete(message)));
   }
 
   ignoreAllErrors() {
