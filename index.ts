@@ -1,3 +1,3 @@
-import { run } from "./src/discord/client";
+import { GirlsClient } from "./src/discord/client";
 
-run();
+new GirlsClient().run();
