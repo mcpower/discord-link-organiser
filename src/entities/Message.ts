@@ -112,6 +112,20 @@ export class Message {
     }
   }
 
+  async fetchReposts(em: EM): Promise<(TwitterLink | PixivLink)[]> {
+    const nestedLinks = await Promise.all(
+      [this.twitterLinks, this.pixivLinks].map(async (collection) => {
+        const links = await collection.loadItems();
+        return Promise.all(links.map((link) => link.lastLink(em)));
+      })
+    );
+    return nestedLinks
+      .flat()
+      .filter(
+        (link): link is Exclude<typeof link, undefined> => link !== undefined
+      );
+  }
+
   get url() {
     // This exceeds 80 chars. Any other way of formatting this is ugly :/
     // prettier-ignore
