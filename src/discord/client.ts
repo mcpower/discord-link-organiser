@@ -30,6 +30,15 @@ export class GirlsClient {
    * relating to the same message run simultaneously.
    */
   messageLocks: Map<Snowflake, LockQueue>;
+  /**
+   * All messages that were processed in ready().
+   * Used to detect when message creation events are emitted for messages that
+   * were processed in ready(), which may occur when a message is sent between
+   * when ready() is initially called, and the getAllMessages call in ready().
+   * Cleared after a few seconds, as it is unlikely that we will process these
+   * messages a few seconds after being ready.
+   */
+  scrollbackMessages: Set<Snowflake>;
 
   constructor() {
     this.client = new Client({
@@ -45,6 +54,7 @@ export class GirlsClient {
       ],
     });
     this.messageLocks = new Map();
+    this.scrollbackMessages = new Set();
 
     let readyPromiseCallback: () => void;
     // The Promise constructor's function is immediately called, so the above
@@ -56,6 +66,8 @@ export class GirlsClient {
     this.client.once("ready", async (client) => {
       await this.ready(client);
       readyPromiseCallback();
+      await delay(10000);
+      this.scrollbackMessages.clear();
     });
     this.client.on("messageCreate", (message) => {
       this.ensureUnlocked(message.id, () => this.messageCreate(message));
@@ -100,11 +112,15 @@ export class GirlsClient {
       console.log(`${author.tag} sent "${content}" (${type})`);
       const dbMessage = toDbMessageAndPopulate(message);
       unprocessedMessages.push(dbMessage);
+      this.scrollbackMessages.add(message.id);
     }
     await em.persistAndFlush(unprocessedMessages);
   }
 
   async messageCreate(message: Message) {
+    if (this.scrollbackMessages.has(message.id)) {
+      return;
+    }
     const { author, content } = message;
     console.log(`Received "${content}" from ${author.tag}`);
     const em = await getEm();
