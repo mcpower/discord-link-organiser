@@ -5,6 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "start": "ts-node index.ts",
+    "startProd": "tsc && node ./build/index.js",
     "debug": "node -r ts-node/register --inspect index.ts",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx; prettier --check .",
     "format": "prettier --write .",
