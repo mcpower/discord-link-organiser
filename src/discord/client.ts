@@ -46,14 +46,14 @@ export class GirlsClient {
     assert(channel.isText());
     const lastMessage = await DbMessage.getLastMessage(channelId, em);
     console.log("lastMessage: ", lastMessage);
-    const dbMessages: DbMessage[] = [];
+    const unprocessedMessages: DbMessage[] = [];
     for await (const message of getAllMessages(channel, lastMessage)) {
       const { author, content, type } = message;
       console.log(`${author.tag} sent "${content}" (${type})`);
       const dbMessage = toDbMessageAndPopulate(message);
-      dbMessages.push(dbMessage);
+      unprocessedMessages.push(dbMessage);
     }
-    await em.persistAndFlush(dbMessages);
+    await em.persistAndFlush(unprocessedMessages);
   }
 
   async messageCreate(message: Message) {
