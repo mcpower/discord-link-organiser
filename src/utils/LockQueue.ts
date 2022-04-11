@@ -35,26 +35,24 @@ export class LockQueue {
     return this.state ? this.state.promise : Promise.resolve();
   }
 
-  private run() {
-    const nextFunction = this.queue.dequeue();
-    if (nextFunction === undefined) {
-      // Safety: This function is only called from two places: enqueue and
-      // itself. Enqueue guarantees that the queue is non-empty (so this block
-      // never runs if called from enqueue), and if this was called from itself
-      // then this.state is guaranteed to be defined.
-      assert(this.state);
-      this.state.resolve();
-      this.state = undefined;
-      return;
+  private async run() {
+    let nextFunction: AsyncFunction | undefined;
+    while ((nextFunction = this.queue.dequeue()) !== undefined) {
+      if (this.state === undefined) {
+        let resolve: (() => void) | undefined = undefined;
+        const promise: Promise<void> = new Promise((r) => (resolve = r));
+        assert(resolve);
+        this.state = { promise, resolve };
+      }
+      await nextFunction();
     }
-    if (this.state === undefined) {
-      let resolve: (() => void) | undefined = undefined;
-      const promise: Promise<void> = new Promise((r) => (resolve = r));
-      assert(resolve);
-      this.state = { promise, resolve };
-    }
-    nextFunction().then(() => {
-      this.run();
-    });
+    // Safety: This function is only called from two places: enqueue and
+    // itself. Enqueue guarantees that the queue is non-empty (so this block
+    // never runs if called from enqueue), and if this was called from itself
+    // then this.state is guaranteed to be defined.
+    assert(this.state);
+    this.state.resolve();
+    this.state = undefined;
+    return;
   }
 }
