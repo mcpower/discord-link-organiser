@@ -40,15 +40,13 @@ export class LockQueue {
   }
 
   private async run() {
+    // Safety: This function is only called from enqueue, and enqueue guarantees
+    // that this.state is defined.
+    assert(this.state);
     let nextFunction: AsyncFunction | undefined;
     while ((nextFunction = this.queue.dequeue()) !== undefined) {
       await nextFunction();
     }
-    // Safety: This function is only called from two places: enqueue and
-    // itself. Enqueue guarantees that the queue is non-empty (so this block
-    // never runs if called from enqueue), and if this was called from itself
-    // then this.state is guaranteed to be defined.
-    assert(this.state);
     this.state.resolve();
     this.state = undefined;
     return;
