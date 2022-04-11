@@ -143,6 +143,10 @@ export class Message {
     return `https://discord.com/channels/${this.guild ?? "@me"}/${this.channel}/${this.id}`;
   }
 
+  get updated() {
+    return this.edited ?? this.created;
+  }
+
   static async getLastMessage(channel: string, em: EM): Promise<string> {
     const qb = em.createQueryBuilder(Message);
     const lastMessage: { id: string } = await qb

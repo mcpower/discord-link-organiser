@@ -201,7 +201,16 @@ export class GirlsClient {
 
   async handleReposts(em: EM, message: Message, dbMessage: DbMessage) {
     const reposts = await dbMessage.fetchReposts(em);
-    if (reposts.length === 0) {
+
+    // TODO: move the below constant somewhere else
+    const repostCutoff = Date.now() - (1000 * 60 * 60 * 24 * 365) / 2;
+
+    // fetchReposts guarantees the message is loaded.
+    // TODO: filter this inside the database query instead (if possible)
+    const withinTimePeriod = reposts.filter(
+      (link) => link.message.getEntity().updated > repostCutoff
+    );
+    if (withinTimePeriod.length === 0) {
       return;
     }
     // Delete and send DM.
