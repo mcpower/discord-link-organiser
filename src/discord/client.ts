@@ -71,18 +71,22 @@ export class GirlsClient {
       await delay(10000);
       this.scrollbackMessages.clear();
     });
-    this.client.on("messageCreate", (message) => {
+    this.client.on("messageCreate", async (message) => {
+      await this.readyPromise;
       this.ensureUnlocked(message.id, () => this.messageCreate(message));
     });
-    this.client.on("messageUpdate", (oldMessage, newMessage) => {
+    this.client.on("messageUpdate", async (oldMessage, newMessage) => {
+      await this.readyPromise;
       this.ensureUnlocked(newMessage.id, () =>
         this.messageUpdate(oldMessage, newMessage)
       );
     });
-    this.client.on("messageDelete", (message) => {
+    this.client.on("messageDelete", async (message) => {
+      await this.readyPromise;
       this.ensureUnlocked(message.id, () => this.messageDelete(message));
     });
-    this.client.on("messageDeleteBulk", (messages) => {
+    this.client.on("messageDeleteBulk", async (messages) => {
+      await this.readyPromise;
       for (const message of messages.values()) {
         this.ensureUnlocked(message.id, () => this.messageDelete(message));
       }
