@@ -189,13 +189,9 @@ export class GirlsClient {
       em.persist(dbMessage);
     } else {
       const data = wrap(newDbMessage).toObject();
-      // Initialising the collections is necessary - if this is omitted, the
-      // entities that are loaded below (i.e. old twitterLinks and pixivLinks)
-      // are NOT deleted when the assign is called.
-      await Promise.all([
-        dbMessage.twitterLinks.init(),
-        dbMessage.pixivLinks.init(),
-      ]);
+      // Populating dbMessage is necessary to ensure twitterLinks and pixivLinks
+      // get correctly cleared when assigning.
+      await em.populate(dbMessage, true);
       // Explicitly setting the collections is necessary, as toObject() doesn't
       // seem to handle nested objects well and rewrites them as arrays of
       // undefineds instead of arrays of objects.
