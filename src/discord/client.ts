@@ -188,16 +188,12 @@ export class GirlsClient {
       dbMessage = newDbMessage;
       em.persist(dbMessage);
     } else {
-      const data = wrap(newDbMessage).toObject();
       // Populating dbMessage is necessary to ensure twitterLinks and pixivLinks
       // get correctly cleared when assigning.
       await em.populate(dbMessage, true);
-      // Explicitly setting the collections is necessary, as toObject() doesn't
-      // seem to handle nested objects well and rewrites them as arrays of
-      // undefineds instead of arrays of objects.
-      data.twitterLinks = newDbMessage.twitterLinks.toArray();
-      data.pixivLinks = newDbMessage.pixivLinks.toArray();
-      wrap(dbMessage).assign(data);
+      // We need .toPOJO here or else it creates a new instance of message when
+      // flushing it, causing primary key constraint errors.
+      wrap(dbMessage).assign(wrap(newDbMessage).toPOJO());
     }
     await em.flush();
     await this.handleReposts(em, newMessage, dbMessage);
