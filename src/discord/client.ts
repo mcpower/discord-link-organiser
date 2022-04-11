@@ -98,9 +98,11 @@ export class GirlsClient {
     if (!lock) {
       lock = new LockQueue();
       this.messageLocks.set(messageId, lock);
+      lock.enqueue(callback);
       lock.finished().then(() => this.messageLocks.delete(messageId));
+    } else {
+      lock.enqueue(callback);
     }
-    lock.enqueue(callback);
   }
 
   async ready(client: Client<true>) {
