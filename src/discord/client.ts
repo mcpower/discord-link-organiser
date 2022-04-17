@@ -7,7 +7,7 @@ import {
   PartialMessage,
   Snowflake,
 } from "discord.js";
-import { channelId, guildId, token } from "../config";
+import * as config from "../config";
 import assert from "assert";
 import { getAllMessages, toDbMessageAndPopulate } from "./lib";
 import { Message as DbMessage } from "../entities";
@@ -97,11 +97,11 @@ export class GirlsClient {
   async ready(client: Client<true>) {
     const em = await getEm();
     console.log(`Logged in as ${client.user.tag}`);
-    const guild = await client.guilds.fetch(guildId);
-    const channel = await guild.channels.fetch(channelId);
+    const guild = await client.guilds.fetch(config.guildId);
+    const channel = await guild.channels.fetch(config.channelId);
     assert(channel);
     assert(channel.isText());
-    const lastMessage = await DbMessage.getLastMessage(channelId, em);
+    const lastMessage = await DbMessage.getLastMessage(config.channelId, em);
     console.log("lastMessage: ", lastMessage);
     const unprocessedMessages: DbMessage[] = [];
     for await (const message of getAllMessages(channel, lastMessage)) {
@@ -232,7 +232,7 @@ export class GirlsClient {
   async run() {
     this.ignoreAllErrors();
     ignoreAllUnhandledExceptions();
-    await this.client.login(token);
+    await this.client.login(config.token);
   }
 }
 
