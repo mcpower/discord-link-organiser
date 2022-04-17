@@ -27,11 +27,12 @@ export class GirlsClient {
    */
   readyPromise: Promise<void>;
   /**
-   * Locks for a given message snowflake.
+   * Lock queue for the channel.
    * Used to prevent races which may occur when multiple async functions
-   * relating to the same message run simultaneously.
+   * relating to the same channel run simultaneously.
+   * (We only support one channel as of writing...)
    */
-  messageLocks: Map<Snowflake, LockQueue>;
+  channelLock: LockQueue;
   /**
    * All messages that were processed in ready().
    * Used to detect when message creation events are emitted for messages that
@@ -55,7 +56,7 @@ export class GirlsClient {
         "GUILD_SCHEDULED_EVENT",
       ],
     });
-    this.messageLocks = new Map();
+    this.channelLock = new LockQueue();
     this.scrollbackMessages = new Set();
 
     let readyPromiseCallback: () => void;
@@ -73,36 +74,24 @@ export class GirlsClient {
     });
     this.client.on("messageCreate", async (message) => {
       await this.readyPromise;
-      this.ensureUnlocked(message.id, () => this.messageCreate(message));
+      this.channelLock.enqueue(() => this.messageCreate(message));
     });
     this.client.on("messageUpdate", async (oldMessage, newMessage) => {
       await this.readyPromise;
-      this.ensureUnlocked(newMessage.id, () =>
+      this.channelLock.enqueue(() =>
         this.messageUpdate(oldMessage, newMessage)
       );
     });
     this.client.on("messageDelete", async (message) => {
       await this.readyPromise;
-      this.ensureUnlocked(message.id, () => this.messageDelete(message));
+      this.channelLock.enqueue(() => this.messageDelete(message));
     });
     this.client.on("messageDeleteBulk", async (messages) => {
       await this.readyPromise;
       for (const message of messages.values()) {
-        this.ensureUnlocked(message.id, () => this.messageDelete(message));
+        this.channelLock.enqueue(() => this.messageDelete(message));
       }
     });
-  }
-
-  async ensureUnlocked(messageId: Snowflake, callback: () => Promise<unknown>) {
-    let lock = this.messageLocks.get(messageId);
-    if (!lock) {
-      lock = new LockQueue();
-      this.messageLocks.set(messageId, lock);
-      lock.enqueue(callback);
-      lock.finished().then(() => this.messageLocks.delete(messageId));
-    } else {
-      lock.enqueue(callback);
-    }
   }
 
   async ready(client: Client<true>) {
