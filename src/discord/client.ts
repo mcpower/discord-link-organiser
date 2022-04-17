@@ -73,22 +73,34 @@ export class GirlsClient {
       this.scrollbackMessages.clear();
     });
     this.client.on("messageCreate", async (message) => {
+      if (message.channelId !== config.channelId) {
+        return;
+      }
       await this.readyPromise;
       this.channelLock.enqueue(() => this.messageCreate(message));
     });
     this.client.on("messageUpdate", async (oldMessage, newMessage) => {
+      if (newMessage.channelId !== config.channelId) {
+        return;
+      }
       await this.readyPromise;
       this.channelLock.enqueue(() =>
         this.messageUpdate(oldMessage, newMessage)
       );
     });
     this.client.on("messageDelete", async (message) => {
+      if (message.channelId !== config.channelId) {
+        return;
+      }
       await this.readyPromise;
       this.channelLock.enqueue(() => this.messageDelete(message));
     });
     this.client.on("messageDeleteBulk", async (messages) => {
       await this.readyPromise;
       for (const message of messages.values()) {
+        if (message.channelId !== config.channelId) {
+          continue;
+        }
         this.channelLock.enqueue(() => this.messageDelete(message));
       }
     });
