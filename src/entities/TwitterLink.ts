@@ -14,8 +14,8 @@ import { EM } from "../orm";
 import { parseTwitterUrl } from "../websites/twitter";
 
 @Entity()
-// Used for "get all posts in channel which sent a link"
-@Index({ properties: ["twitterId", "channel"] })
+// Used for "get all posts in channel which sent a link before a given time"
+@Index({ properties: ["twitterId", "channel", "created"] })
 export class TwitterLink {
   // when it's necessary, add a generic "HasId" on the class
   @PrimaryKey({ autoincrement: true })
@@ -31,10 +31,15 @@ export class TwitterLink {
   @Property()
   channel: string;
 
+  // Denormalised. Should be equivalent to message.updated.
+  @Property()
+  created: number;
+
   constructor(message: Message, twitterId: string) {
     this.message = Reference.create(message);
     this.twitterId = twitterId;
     this.channel = message.channel;
+    this.created = message.updated;
   }
 
   static fromUrl(message: Message, url: URL): TwitterLink | undefined {
@@ -52,11 +57,13 @@ export class TwitterLink {
       .where({
         twitterId: this.twitterId,
         channel: this.channel,
+        // probably not needed
         message: { $ne: this.message.id },
+        created: { $lt: this.created },
       })
       .leftJoinAndSelect("t.message", "m")
       .orderBy({
-        [expr("coalesce(`m`.`edited`, `m`.`created`)")]: QueryOrder.DESC,
+        created: QueryOrder.DESC,
       })
       .limit(1)
       .getSingleResult();

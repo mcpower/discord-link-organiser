@@ -123,6 +123,19 @@ export class Message {
     }
   }
 
+  /**
+   * Assumes twitterLinks and pixivLinks are both loaded.
+   */
+  setEdited(edited: number | undefined) {
+    this.edited = edited;
+    for (const twitterLink of this.twitterLinks.getItems()) {
+      twitterLink.created = this.updated;
+    }
+    for (const pixivLink of this.pixivLinks.getItems()) {
+      pixivLink.created = this.updated;
+    }
+  }
+
   async fetchReposts(em: EM): Promise<(TwitterLink | PixivLink)[]> {
     const nestedLinks = await Promise.all(
       [this.twitterLinks, this.pixivLinks].map(async (collection) => {

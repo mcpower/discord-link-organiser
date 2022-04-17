@@ -14,8 +14,8 @@ import { EM } from "../orm";
 import { parsePixivUrl } from "../websites/pixiv";
 
 @Entity()
-// Used for "get all posts in channel which sent a link"
-@Index({ properties: ["id", "channel"] })
+// Used for "get all posts in channel which sent a link before a given time"
+@Index({ properties: ["pixivId", "channel", "created"] })
 export class PixivLink {
   // when it's necessary, add a generic "HasId" on the class
   @PrimaryKey({ autoincrement: true })
@@ -31,10 +31,15 @@ export class PixivLink {
   @Property()
   channel: string;
 
+  // Denormalised. Should be equivalent to message.updated.
+  @Property()
+  created: number;
+
   constructor(message: Message, pixivId: string) {
     this.message = Reference.create(message);
     this.pixivId = pixivId;
     this.channel = message.channel;
+    this.created = message.updated;
   }
 
   static fromUrl(message: Message, url: URL): PixivLink | undefined {
@@ -50,13 +55,15 @@ export class PixivLink {
     const dbLink = await qb
       .select("*")
       .where({
-        twitterId: this.pixivId,
+        pixivId: this.pixivId,
         channel: this.channel,
+        // probably not needed
         message: { $ne: this.message.id },
+        created: { $lt: this.created },
       })
       .leftJoinAndSelect("t.message", "m")
       .orderBy({
-        [expr("coalesce(`m`.`edited`, `m`.`created`)")]: QueryOrder.DESC,
+        created: QueryOrder.DESC,
       })
       .limit(1)
       .getSingleResult();

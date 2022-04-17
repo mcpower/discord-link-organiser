@@ -179,7 +179,9 @@ export class GirlsClient {
       (newMessage.content === null || newMessage.content === dbMessage.content)
     ) {
       if (newMessage.editedTimestamp) {
-        dbMessage.edited = newMessage.editedTimestamp ?? undefined;
+        // Ensure denormalised link timestamps are updated too.
+        await em.populate(dbMessage, true);
+        dbMessage.setEdited(newMessage.editedTimestamp ?? undefined);
         await em.flush();
       }
       return;
