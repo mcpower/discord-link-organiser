@@ -73,14 +73,22 @@ export class GirlsClient {
       this.scrollbackMessages.clear();
     });
     this.client.on("messageCreate", async (message) => {
-      if (message.channelId !== config.channelId) {
+      if (
+        message.channelId !== config.channelId ||
+        (message.type !== "DEFAULT" && message.type !== "REPLY")
+      ) {
         return;
       }
       await this.readyPromise;
       this.channelLock.enqueue(() => this.messageCreate(message));
     });
     this.client.on("messageUpdate", async (oldMessage, newMessage) => {
-      if (newMessage.channelId !== config.channelId) {
+      if (
+        newMessage.channelId !== config.channelId ||
+        (newMessage.type !== null &&
+          newMessage.type !== "DEFAULT" &&
+          newMessage.type !== "REPLY")
+      ) {
         return;
       }
       await this.readyPromise;
@@ -89,18 +97,30 @@ export class GirlsClient {
       );
     });
     this.client.on("messageDelete", async (message) => {
-      if (message.channelId !== config.channelId) {
+      if (
+        message.channelId !== config.channelId ||
+        (message.type !== null &&
+          message.type !== "DEFAULT" &&
+          message.type !== "REPLY")
+      ) {
         return;
       }
       await this.readyPromise;
+      // If message type is unknown, try deleting it anyway.
       this.channelLock.enqueue(() => this.messageDelete(message));
     });
     this.client.on("messageDeleteBulk", async (messages) => {
       await this.readyPromise;
       for (const message of messages.values()) {
-        if (message.channelId !== config.channelId) {
+        if (
+          message.channelId !== config.channelId ||
+          (message.type !== null &&
+            message.type !== "DEFAULT" &&
+            message.type !== "REPLY")
+        ) {
           continue;
         }
+        // If message type is unknown, try deleting it anyway.
         this.channelLock.enqueue(() => this.messageDelete(message));
       }
     });
@@ -142,15 +162,10 @@ export class GirlsClient {
     _oldMessage: Message | PartialMessage,
     newMessage: Message | PartialMessage
   ) {
-    // Inspecting the Discord API, these fields SHOULD exist on newMessage ON A
-    // MANUAL EDIT BY THE USER:
-    // attachments, author, channel_id, components, content, edited_timestamp,
-    // embeds, flags, guild_id, id, member, mention_everyone, mention_roles,
-    // mentions, pinned, timestamp, tts, type
-    // These fields should exist when an embed is updated:
-    // channel_id, embeds, guild_id, id.
-    // However, we should still explicitly fetch the message if we don't have
-    // it.
+    // It's possible we don't have the message type of this message, so we need
+    // to check that down the line.
+    // From https://discord.com/developers/docs/topics/gateway#message-update:
+    // > message updates [...] will always contain an id and channel_id.
     console.log(
       `Edited "${newMessage.content}" from ${newMessage.author?.tag}`
     );
@@ -181,6 +196,10 @@ export class GirlsClient {
         return;
       }
       console.log("Error when trying to fetch message in update:", err);
+      return;
+    }
+
+    if (newMessage.type !== "DEFAULT" && newMessage.type !== "REPLY") {
       return;
     }
 
