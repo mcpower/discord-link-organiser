@@ -1,4 +1,3 @@
-import process from "process";
 import {
   Client,
   DiscordAPIError,

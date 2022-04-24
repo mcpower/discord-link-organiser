@@ -1,6 +1,5 @@
 import {
   Entity,
-  expr,
   IdentifiedReference,
   Index,
   ManyToOne,

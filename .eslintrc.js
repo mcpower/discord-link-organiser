@@ -23,5 +23,13 @@ module.exports = {
       },
     ],
     "@typescript-eslint/restrict-template-expressions": ["off"],
+    "@typescript-eslint/no-unnecessary-condition": [
+      "error",
+      {
+        allowConstantLoopConditions: true,
+      },
+    ],
+    // the above is a stronger version of the below
+    "no-constant-condition": ["off"],
   },
 };

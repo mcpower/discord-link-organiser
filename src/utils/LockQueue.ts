@@ -27,7 +27,7 @@ export class LockQueue {
       const promise: Promise<void> = new Promise((r) => (resolve = r));
       assert(resolve);
       this.state = { promise, resolve };
-      this.run();
+      void this.run();
     }
   }
 
