@@ -144,7 +144,7 @@ export class GirlsClient {
       return;
     }
     if (newMessage.editedTimestamp === null) {
-      // TODO: determine whether this could ever happen
+      // This should never happen, but we should handle this case anyway.
       console.log(
         `update: ${newMessage.id} had updated content ${newMessage.content} but no editedTimestamp`
       );
@@ -196,7 +196,9 @@ export class GirlsClient {
       // get correctly cleared.
       await em.populate(dbMessage, true);
       dbMessage.content = newMessage.content;
-      dbMessage.setEdited(newMessage.editedTimestamp ?? undefined);
+      if (newMessage.editedTimestamp) {
+        dbMessage.setEdited(newMessage.editedTimestamp);
+      }
       dbMessage.twitterLinks.removeAll();
       dbMessage.pixivLinks.removeAll();
       dbMessage.populateLinks();
