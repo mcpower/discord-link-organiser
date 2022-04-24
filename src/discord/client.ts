@@ -17,14 +17,6 @@ import { LockQueue } from "../utils/LockQueue";
 export class GirlsClient {
   client: Client;
   /**
-   * Resolved when this.ready() finishes.
-   * Used to prevent races - for example, if a message is sent before ready()
-   * finishes, it could change DbMessage.getLastMessage to be the newest message
-   * instead of an old message, causing this.ready() to fail to fetch older
-   * mesages.
-   */
-  readyPromise: Promise<void>;
-  /**
    * Lock queue for the channel.
    * Used to prevent races which may occur when multiple async functions
    * relating to the same channel run simultaneously.
@@ -47,28 +39,20 @@ export class GirlsClient {
     });
     this.channelLock = new LockQueue();
 
-    let readyPromiseCallback: () => void;
-    // The Promise constructor's function is immediately called, so the above
-    // variable is guaranteed to be initialised after the following statement.
-    this.readyPromise = new Promise((resolve) => {
-      readyPromiseCallback = resolve;
+    this.client.on("ready", (client) => {
+      // Note that this gets really messy if we support multiple channels...
+      this.channelLock.enqueue(() => this.ready(client));
     });
-
-    this.client.on("ready", async (client) => {
-      await this.ready(client);
-      readyPromiseCallback();
-    });
-    this.client.on("messageCreate", async (message) => {
+    this.client.on("messageCreate", (message) => {
       if (
         message.channelId !== config.channelId ||
         (message.type !== "DEFAULT" && message.type !== "REPLY")
       ) {
         return;
       }
-      await this.readyPromise;
       this.channelLock.enqueue(() => this.messageCreate(message));
     });
-    this.client.on("messageUpdate", async (oldMessage, newMessage) => {
+    this.client.on("messageUpdate", (oldMessage, newMessage) => {
       if (
         newMessage.channelId !== config.channelId ||
         (newMessage.type !== null &&
@@ -77,12 +61,11 @@ export class GirlsClient {
       ) {
         return;
       }
-      await this.readyPromise;
       this.channelLock.enqueue(() =>
         this.messageUpdate(oldMessage, newMessage)
       );
     });
-    this.client.on("messageDelete", async (message) => {
+    this.client.on("messageDelete", (message) => {
       if (
         message.channelId !== config.channelId ||
         (message.type !== null &&
@@ -91,12 +74,10 @@ export class GirlsClient {
       ) {
         return;
       }
-      await this.readyPromise;
       // If message type is unknown, try deleting it anyway.
       this.channelLock.enqueue(() => this.messageDelete(message));
     });
-    this.client.on("messageDeleteBulk", async (messages) => {
-      await this.readyPromise;
+    this.client.on("messageDeleteBulk", (messages) => {
       for (const message of messages.values()) {
         if (
           message.channelId !== config.channelId ||
