@@ -1,5 +1,5 @@
 // Type checked config file with TypeScript.
-import { token, guildId, channelId } from "../config.json";
+import { token, guildId, channelId, debug } from "../config.json";
 
 // eslint-disable-next-line no-constant-condition
 if (false) {
@@ -8,6 +8,7 @@ if (false) {
   isType<string>(token);
   isType<string>(guildId);
   isType<string>(channelId);
+  isType<boolean>(debug);
 }
 
-export { token, guildId, channelId };
+export { token, guildId, channelId, debug };
