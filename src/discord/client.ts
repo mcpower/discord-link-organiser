@@ -235,9 +235,9 @@ export class GirlsClient {
     // database message still existing.
     await em.removeAndFlush(dbMessage);
     // Discord-related promises below.
-    message.delete();
+    void message.delete();
     // The author is probably in the cache.
-    (async () => {
+    void (async () => {
       const author = await this.client.users.fetch(dbMessage.author);
       try {
         await author.send("Your last message had a repost.");

@@ -5,8 +5,13 @@ module.exports = {
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "prettier",
   ],
+  parserOptions: {
+    tsconfigRootDir: __dirname,
+    project: ["./tsconfig.json"],
+  },
   env: { node: true },
   rules: {
     "@typescript-eslint/no-unused-vars": [
@@ -17,5 +22,6 @@ module.exports = {
         caughtErrorsIgnorePattern: "^_",
       },
     ],
+    "@typescript-eslint/restrict-template-expressions": ["off"],
   },
 };
