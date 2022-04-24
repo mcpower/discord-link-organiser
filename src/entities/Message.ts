@@ -50,7 +50,6 @@ export class Message {
   @Property()
   content: string;
 
-  // Could change on edit.
   @Property()
   attachments: number;
 
