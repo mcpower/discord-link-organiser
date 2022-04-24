@@ -54,10 +54,6 @@ export class Message {
   attachments: number;
 
   // Based on content.
-  @Property()
-  comment: string;
-
-  // Based on content.
   @OneToMany({
     entity: () => TwitterLink,
     mappedBy: "message",
@@ -102,12 +98,10 @@ export class Message {
     this.edited = edited;
     this.content = content;
     this.attachments = attachments;
-    this.comment = "";
   }
 
   populateLinks() {
-    const { comment, links } = parseMessage(this.content);
-    this.comment = comment;
+    const { links } = parseMessage(this.content);
     for (const { url } of links) {
       const twitter = TwitterLink.fromUrl(this, url);
       if (twitter) {
