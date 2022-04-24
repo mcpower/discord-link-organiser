@@ -1,9 +1,4 @@
-import {
-  BaseGuildTextChannel,
-  Collection,
-  Message,
-  Snowflake,
-} from "discord.js";
+import { Message, MessageManager } from "discord.js";
 import { Message as DbMessage } from "../entities";
 import { compareBigints } from "../utils/bigints";
 
@@ -40,19 +35,18 @@ export function toDbMessageAndPopulate(message: Message): DbMessage {
 
 /**
  * Gets all messages since a given post.
- * @param channel The channel to fetch messages from.
+ * @param messageManager The MessageManager to fetch messages from.
  * @param after A Discord post snowflake.
  */
 export async function* getAllMessages(
-  channel: BaseGuildTextChannel,
+  messageManager: MessageManager,
   after = "0"
 ) {
   while (true) {
-    const messages: Collection<Snowflake, Message> =
-      await channel.messages.fetch({
-        limit: MAX_MESSAGES_PER_FETCH,
-        after,
-      });
+    const messages = await messageManager.fetch({
+      limit: MAX_MESSAGES_PER_FETCH,
+      after,
+    });
     // Discord doesn't guarantee any order for these messages...
     // https://discord.com/developers/docs/resources/channel#get-channel-messages
     // Sort from lowest ID to highest.

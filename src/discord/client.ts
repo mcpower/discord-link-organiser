@@ -92,14 +92,13 @@ export class GirlsClient {
   async ready(client: Client<true>) {
     const em = await getEm();
     console.log(`ready: logged in as ${client.user.tag}`);
-    const guild = await client.guilds.fetch(config.guildId);
-    const channel = await guild.channels.fetch(config.channelId);
-    assert(channel);
-    assert(channel.isText());
+    const channel = await client.channels.fetch(config.channelId);
+    assert(channel, "The config's channel does not exist.");
+    assert(channel.isText(), "The config's channel is not a text channel.");
     const lastMessage = await DbMessage.getLastMessage(config.channelId, em);
     console.log(`ready: getting all messages from ${lastMessage}`);
     let numMessages = 0;
-    for await (const message of getAllMessages(channel, lastMessage)) {
+    for await (const message of getAllMessages(channel.messages, lastMessage)) {
       if (GirlsClient.shouldIgnore(message)) {
         continue;
       }
