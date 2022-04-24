@@ -5,7 +5,6 @@ import {
   Intents,
   Message,
   PartialMessage,
-  Snowflake,
 } from "discord.js";
 import * as config from "../config";
 import assert from "assert";
@@ -14,7 +13,6 @@ import { Message as DbMessage } from "../entities";
 import { EM, getEm } from "../orm";
 import { delay } from "../utils/delay";
 import { LockQueue } from "../utils/LockQueue";
-import { wrap } from "@mikro-orm/core";
 
 export class GirlsClient {
   client: Client;
@@ -33,15 +31,6 @@ export class GirlsClient {
    * (We only support one channel as of writing...)
    */
   channelLock: LockQueue;
-  /**
-   * All messages that were processed in ready().
-   * Used to detect when message creation events are emitted for messages that
-   * were processed in ready(), which may occur when a message is sent between
-   * when ready() is initially called, and the getAllMessages call in ready().
-   * Cleared after a few seconds, as it is unlikely that we will process these
-   * messages a few seconds after being ready.
-   */
-  scrollbackMessages: Set<Snowflake>;
 
   constructor() {
     this.client = new Client({
@@ -57,7 +46,6 @@ export class GirlsClient {
       ],
     });
     this.channelLock = new LockQueue();
-    this.scrollbackMessages = new Set();
 
     let readyPromiseCallback: () => void;
     // The Promise constructor's function is immediately called, so the above
@@ -66,11 +54,9 @@ export class GirlsClient {
       readyPromiseCallback = resolve;
     });
 
-    this.client.once("ready", async (client) => {
+    this.client.on("ready", async (client) => {
       await this.ready(client);
       readyPromiseCallback();
-      await delay(10000);
-      this.scrollbackMessages.clear();
     });
     this.client.on("messageCreate", async (message) => {
       if (
@@ -141,18 +127,19 @@ export class GirlsClient {
       console.log(`${author.tag} sent "${content}" (${type})`);
       const dbMessage = toDbMessageAndPopulate(message);
       unprocessedMessages.push(dbMessage);
-      this.scrollbackMessages.add(message.id);
     }
     await em.persistAndFlush(unprocessedMessages);
   }
 
   async messageCreate(message: Message) {
-    if (this.scrollbackMessages.has(message.id)) {
-      return;
-    }
     const { author, content } = message;
     console.log(`Received "${content}" from ${author.tag}`);
     const em = await getEm();
+    const inDb = await em.count(DbMessage, message.id);
+    if (inDb > 0) {
+      console.log(`create: ${message.id} was already in DB`);
+      return;
+    }
     const dbMessage = toDbMessageAndPopulate(message);
     await em.persistAndFlush(dbMessage);
     await this.handleReposts(em, message, dbMessage);
@@ -164,64 +151,83 @@ export class GirlsClient {
   ) {
     // It's possible we don't have the message type of this message, so we need
     // to check that down the line.
-    // From https://discord.com/developers/docs/topics/gateway#message-update:
+    // From https://discord.com/developers/docs/topics/gateway#message-update
     // > message updates [...] will always contain an id and channel_id.
+    // That means this function is only called if channelId is correct, so we
+    // don't need to check channelId in this method.
     console.log(
       `Edited "${newMessage.content}" from ${newMessage.author?.tag}`
     );
 
+    if (newMessage.content === null) {
+      // Nothing interesting changed - ignore.
+      return;
+    }
+    if (newMessage.editedTimestamp === null) {
+      // TODO: determine whether this could ever happen
+      console.log(
+        `update: ${newMessage.id} had updated content ${newMessage.content} but no editedTimestamp`
+      );
+    }
+
     const em = await getEm();
     let dbMessage = await em.findOne(DbMessage, newMessage.id);
-    // If we've seen this message before AND nothing interesting was changed,
-    // just update the edited timestamp.
-    if (
-      dbMessage !== null &&
-      (newMessage.content === null || newMessage.content === dbMessage.content)
-    ) {
-      if (newMessage.editedTimestamp) {
-        // Ensure denormalised link timestamps are updated too.
-        await em.populate(dbMessage, true);
-        dbMessage.setEdited(newMessage.editedTimestamp ?? undefined);
-        await em.flush();
-      }
-      return;
-    }
 
-    // Otherwise, fetch everything and check for reposts.
-    try {
-      newMessage = await newMessage.fetch();
-    } catch (err: unknown) {
-      // The message was probably deleted.
-      // Check for "unknown message" code:
-      // https://discord.com/developers/docs/topics/opcodes-and-status-codes#json-json-error-codes
-      if (err instanceof DiscordAPIError && err.code === 10008) {
+    if (dbMessage === null) {
+      try {
+        newMessage = await newMessage.fetch();
+      } catch (err: unknown) {
+        // The message was probably deleted.
+        // Check for "unknown message" code:
+        // https://discord.com/developers/docs/topics/opcodes-and-status-codes#json-json-error-codes
+        if (err instanceof DiscordAPIError && err.code === 10008) {
+          return;
+        }
+        console.log("Error when trying to fetch message in update:", err);
         return;
       }
-      console.log("Error when trying to fetch message in update:", err);
-      return;
-    }
 
-    if (newMessage.type !== "DEFAULT" && newMessage.type !== "REPLY") {
-      return;
-    }
-
-    const newDbMessage = toDbMessageAndPopulate(newMessage);
-    if (dbMessage === null) {
-      dbMessage = newDbMessage;
+      if (newMessage.type !== "DEFAULT" && newMessage.type !== "REPLY") {
+        return;
+      }
+      dbMessage = toDbMessageAndPopulate(newMessage);
       em.persist(dbMessage);
     } else {
+      // If nothing interesting was changed, do nothing. Yes, we don't even
+      // update the edited timestamp, as there's no point.
+      if (newMessage.content === dbMessage.content) {
+        return;
+      }
+      // If we somehow already have a more-up-to-date version of this message in
+      // our database, ignore this edit.
+      if (
+        newMessage.editedTimestamp !== null &&
+        dbMessage.edited !== undefined &&
+        newMessage.editedTimestamp <= dbMessage.edited
+      ) {
+        return;
+      }
+
+      // Update content and editedTimestamp.
       // Populating dbMessage is necessary to ensure twitterLinks and pixivLinks
-      // get correctly cleared when assigning.
+      // get correctly cleared.
       await em.populate(dbMessage, true);
-      // We need .toPOJO here or else it creates a new instance of message when
-      // flushing it, causing primary key constraint errors.
-      wrap(dbMessage).assign(wrap(newDbMessage).toPOJO());
+      dbMessage.content = newMessage.content;
+      dbMessage.setEdited(newMessage.editedTimestamp ?? undefined);
+      dbMessage.twitterLinks.removeAll();
+      dbMessage.pixivLinks.removeAll();
+      dbMessage.populateLinks();
     }
+
     await em.flush();
     await this.handleReposts(em, newMessage, dbMessage);
   }
 
-  async handleReposts(em: EM, message: Message, dbMessage: DbMessage) {
+  async handleReposts(
+    em: EM,
+    message: Message | PartialMessage,
+    dbMessage: DbMessage
+  ) {
     const reposts = await dbMessage.fetchReposts(em);
 
     // TODO: move the below constant somewhere else
@@ -237,7 +243,8 @@ export class GirlsClient {
     }
     // Delete and send DM.
     const deletePromise = message.delete();
-    const author = message.author;
+    // The author is probably in the cache.
+    const author = await this.client.users.fetch(dbMessage.author);
     const dmPromise = author
       .send("Your last message had a repost.")
       .catch(async () => {
