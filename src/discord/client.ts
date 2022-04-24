@@ -44,21 +44,13 @@ export class GirlsClient {
       this.channelLock.enqueue(() => this.ready(client));
     });
     this.client.on("messageCreate", (message) => {
-      if (
-        message.channelId !== config.channelId ||
-        (message.type !== "DEFAULT" && message.type !== "REPLY")
-      ) {
+      if (GirlsClient.shouldIgnore(message)) {
         return;
       }
       this.channelLock.enqueue(() => this.messageCreate(message));
     });
     this.client.on("messageUpdate", (oldMessage, newMessage) => {
-      if (
-        newMessage.channelId !== config.channelId ||
-        (newMessage.type !== null &&
-          newMessage.type !== "DEFAULT" &&
-          newMessage.type !== "REPLY")
-      ) {
+      if (GirlsClient.shouldIgnore(newMessage)) {
         return;
       }
       this.channelLock.enqueue(() =>
@@ -66,12 +58,7 @@ export class GirlsClient {
       );
     });
     this.client.on("messageDelete", (message) => {
-      if (
-        message.channelId !== config.channelId ||
-        (message.type !== null &&
-          message.type !== "DEFAULT" &&
-          message.type !== "REPLY")
-      ) {
+      if (GirlsClient.shouldIgnore(message)) {
         return;
       }
       // If message type is unknown, try deleting it anyway.
@@ -79,18 +66,24 @@ export class GirlsClient {
     });
     this.client.on("messageDeleteBulk", (messages) => {
       for (const message of messages.values()) {
-        if (
-          message.channelId !== config.channelId ||
-          (message.type !== null &&
-            message.type !== "DEFAULT" &&
-            message.type !== "REPLY")
-        ) {
+        if (GirlsClient.shouldIgnore(message)) {
           continue;
         }
         // If message type is unknown, try deleting it anyway.
         this.channelLock.enqueue(() => this.messageDelete(message));
       }
     });
+  }
+
+  static shouldIgnore(message: Message | PartialMessage) {
+    // This is on the permissive side - if the message type is unknown, allow
+    // it.
+    return (
+      message.channelId !== config.channelId ||
+      (message.type !== null &&
+        message.type !== "DEFAULT" &&
+        message.type !== "REPLY")
+    );
   }
 
   async ready(client: Client<true>) {
@@ -106,6 +99,9 @@ export class GirlsClient {
     for await (const message of getAllMessages(channel, lastMessage)) {
       const { author, content, type } = message;
       console.log(`${author.tag} sent "${content}" (${type})`);
+      if (GirlsClient.shouldIgnore(message)) {
+        continue;
+      }
       const dbMessage = toDbMessageAndPopulate(message);
       unprocessedMessages.push(dbMessage);
     }
@@ -168,7 +164,7 @@ export class GirlsClient {
         return;
       }
 
-      if (newMessage.type !== "DEFAULT" && newMessage.type !== "REPLY") {
+      if (GirlsClient.shouldIgnore(newMessage)) {
         return;
       }
       dbMessage = toDbMessageAndPopulate(newMessage);
