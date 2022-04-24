@@ -88,29 +88,28 @@ export class GirlsClient {
 
   async ready(client: Client<true>) {
     const em = await getEm();
-    console.log(`Logged in as ${client.user.tag}`);
+    console.log(`ready: logged in as ${client.user.tag}`);
     const guild = await client.guilds.fetch(config.guildId);
     const channel = await guild.channels.fetch(config.channelId);
     assert(channel);
     assert(channel.isText());
     const lastMessage = await DbMessage.getLastMessage(config.channelId, em);
-    console.log("lastMessage: ", lastMessage);
-    const unprocessedMessages: DbMessage[] = [];
+    console.log(`ready: getting all messages from ${lastMessage}`);
+    let numMessages = 0;
     for await (const message of getAllMessages(channel, lastMessage)) {
-      const { author, content, type } = message;
-      console.log(`${author.tag} sent "${content}" (${type})`);
       if (GirlsClient.shouldIgnore(message)) {
         continue;
       }
       const dbMessage = toDbMessageAndPopulate(message);
-      unprocessedMessages.push(dbMessage);
+      em.persist(dbMessage);
+      numMessages++;
     }
-    await em.persistAndFlush(unprocessedMessages);
+    console.log(`ready: inserting ${numMessages} message(s)`);
+    await em.flush();
   }
 
   async messageCreate(message: Message) {
-    const { author, content } = message;
-    console.log(`Received "${content}" from ${author.tag}`);
+    console.log(`create: message ${message.id}`);
     const em = await getEm();
     const inDb = await em.count(DbMessage, message.id);
     if (inDb > 0) {
@@ -132,9 +131,7 @@ export class GirlsClient {
     // > message updates [...] will always contain an id and channel_id.
     // That means this function is only called if channelId is correct, so we
     // don't need to check channelId in this method.
-    console.log(
-      `Edited "${newMessage.content}" from ${newMessage.author?.tag}`
-    );
+    console.log(`update: message ${newMessage.id}`);
 
     if (newMessage.content === null) {
       // Nothing interesting changed - ignore.
@@ -160,7 +157,7 @@ export class GirlsClient {
         if (err instanceof DiscordAPIError && err.code === 10008) {
           return;
         }
-        console.log("Error when trying to fetch message in update:", err);
+        console.log(`update: error when fetching ${newMessage.id}`, err);
         return;
       }
 
@@ -182,6 +179,9 @@ export class GirlsClient {
         dbMessage.edited !== undefined &&
         newMessage.editedTimestamp <= dbMessage.edited
       ) {
+        console.log(
+          `update: message ${newMessage.id} was older (${newMessage.editedTimestamp}) than db (${dbMessage.edited})`
+        );
         return;
       }
 
@@ -218,6 +218,7 @@ export class GirlsClient {
     if (withinTimePeriod.length === 0) {
       return;
     }
+    console.log(`reposts: deleting ${message.id}`);
     // Delete and send DM.
     // DON'T await Discord-related promises - these don't touch the database and
     // we don't want to block the entire channel's queue as it's for database,
@@ -246,7 +247,7 @@ export class GirlsClient {
 
   async messageDelete(message: Message | PartialMessage) {
     // Only guild_id, channel_id and id exist here.
-    console.log(`Message ${message.id} deleted`);
+    console.log(`delete: message ${message.id}`);
     const em = await getEm();
     await em.nativeDelete(Message, message.id);
   }
