@@ -5,6 +5,7 @@ import {
   Intents,
   Message,
   PartialMessage,
+  Snowflake,
 } from "discord.js";
 import * as config from "../config";
 import assert from "assert";
@@ -97,16 +98,20 @@ export class GirlsClient {
     assert(channel.isText(), "The config's channel is not a text channel.");
     const lastMessage = await DbMessage.getLastMessage(config.channelId, em);
     console.log(`ready: getting all messages from ${lastMessage}`);
-    let numMessages = 0;
+    const messageIds: Snowflake[] = [];
     for await (const message of getAllMessages(channel.messages, lastMessage)) {
       if (GirlsClient.shouldIgnore(message)) {
         continue;
       }
       const dbMessage = toDbMessageAndPopulate(message);
       em.persist(dbMessage);
-      numMessages++;
+      messageIds.push(message.id);
     }
-    console.log(`ready: inserting ${numMessages} message(s)`);
+    // Delete messages if they're already in the database. The above fetch
+    // should all be new - and if they're not, these are more recently fetched
+    // than the ones inside the database.
+    await em.nativeDelete(DbMessage, messageIds);
+    console.log(`ready: inserting ${messageIds.length} message(s)`);
     await em.flush();
   }
 
