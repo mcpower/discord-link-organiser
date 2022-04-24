@@ -127,8 +127,8 @@ export class GirlsClient {
   ) {
     // It's possible we don't have the message type of this message, so we need
     // to check that down the line.
-    // From https://discord.com/developers/docs/topics/gateway#message-update
-    // > message updates [...] will always contain an id and channel_id.
+    // This will always contain an id and channel_id:
+    // https://discord.com/developers/docs/topics/gateway#message-update
     // That means this function is only called if channelId is correct, so we
     // don't need to check channelId in this method.
     console.log(`update: message ${newMessage.id}`);
@@ -246,7 +246,8 @@ export class GirlsClient {
   }
 
   async messageDelete(message: Message | PartialMessage) {
-    // Only guild_id, channel_id and id exist here.
+    // Only guild_id?, channel_id and id exist here:
+    // https://discord.com/developers/docs/topics/gateway#message-delete-message-delete-event-fields
     console.log(`delete: message ${message.id}`);
     const em = await getEm();
     await em.nativeDelete(Message, message.id);
