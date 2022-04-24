@@ -242,20 +242,29 @@ export class GirlsClient {
       return;
     }
     // Delete and send DM.
-    const deletePromise = message.delete();
+    // DON'T await Discord-related promises - these don't touch the database and
+    // we don't want to block the entire channel's queue as it's for database,
+    // not Discord purposes.
+    // However, there could be a race where the message isn't deleted yet and
+    // we move onto the next post, which is a repost of THIS - due to this
+    // database message still existing.
+    await em.removeAndFlush(dbMessage);
+    // Discord-related promises below.
+    message.delete();
     // The author is probably in the cache.
-    const author = await this.client.users.fetch(dbMessage.author);
-    const dmPromise = author
-      .send("Your last message had a repost.")
-      .catch(async () => {
+    (async () => {
+      const author = await this.client.users.fetch(dbMessage.author);
+      try {
+        await author.send("Your last message had a repost.");
+      } catch (err) {
         const repostMessage = await message.channel.send({
           content: `${author}, your last message had a repost. (I couldn't DM you!)`,
           allowedMentions: { users: [author.id] },
         });
         await delay(3000);
         await repostMessage.delete();
-      });
-    await Promise.all([deletePromise, dmPromise]);
+      }
+    })();
   }
 
   async messageDelete(message: Message | PartialMessage) {
