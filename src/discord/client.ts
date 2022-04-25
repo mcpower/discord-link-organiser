@@ -240,7 +240,19 @@ export class GirlsClient {
     // database message still existing.
     await em.removeAndFlush(dbMessage);
     // Discord-related promises below.
-    void message.delete();
+    void (async () => {
+      try {
+        await message.delete();
+      } catch (err: unknown) {
+        // Check for "lack permissions" code:
+        // https://discord.com/developers/docs/topics/opcodes-and-status-codes#json-json-error-codes
+        if (err instanceof DiscordAPIError && err.code === 50013) {
+          return;
+        }
+        console.log(`reposts: error when deleting ${message.id}`, err);
+        return;
+      }
+    })();
     // The author is probably in the cache.
     void (async () => {
       const author = await this.client.users.fetch(dbMessage.author);
