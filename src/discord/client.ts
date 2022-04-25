@@ -295,7 +295,17 @@ export class GirlsClient {
     await em.nativeDelete(Message, message.id);
   }
 
+  ignoreAllErrors() {
+    this.client.on("error", console.error);
+  }
+
   async run() {
+    this.ignoreAllErrors();
+    ignoreAllUnhandledExceptions();
     await this.client.login(config.token);
   }
+}
+
+function ignoreAllUnhandledExceptions() {
+  process.on("unhandledRejection", console.error);
 }
