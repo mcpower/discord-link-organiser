@@ -238,8 +238,8 @@ export class GirlsClient {
     // However, there could be a race where the message isn't deleted yet and
     // we move onto the next post, which is a repost of THIS - due to this
     // database message still existing.
-    await em.removeAndFlush(dbMessage);
-    // Discord-related promises below.
+    // However... if the delete DIDN'T work, the message will be lost forever.
+    // This is bad! The race here is okay to work around that.
     void (async () => {
       try {
         await message.delete();
