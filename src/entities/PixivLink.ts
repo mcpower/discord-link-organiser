@@ -49,6 +49,10 @@ export class PixivLink {
     return new PixivLink(message, pixivId);
   }
 
+  get url(): string {
+    return `https://www.pixiv.net/en/artworks/${this.pixivId}`;
+  }
+
   async lastLink(em: EM): Promise<PixivLink | undefined> {
     const qb = em.createQueryBuilder(PixivLink, "t");
     const dbLink = await qb
