@@ -248,38 +248,25 @@ export class GirlsClient {
         reposts.map(async (link) => {
           const linkMessage = link.message.getEntity();
           const createdSecs = Math.round(link.created / 1000);
-          let author = "you";
+          let author = "You";
           if (linkMessage.author !== dbMessage.author) {
-            author = (await this.client.users.fetch(linkMessage.author))
-              .username;
+            author = (
+              await this.client.users.fetch(linkMessage.author)
+            ).toString();
           }
-          return `${author} sent <${link.url}> <t:${createdSecs}:R> (<${linkMessage.url}>)`;
+          return {
+            description: `${author} sent ${link.url} [<t:${createdSecs}:R>](${linkMessage.url}).`,
+          };
         })
       );
-      // you sent X Y ago (Z) and A sent B C ago (D).
-      const notice =
-        notices
-          .map((notice, i) => {
-            switch (i) {
-              case 0:
-                return notice;
-
-              case notices.length - 1:
-                return `and ${notice}`;
-
-              default:
-                return `, ${notice}`;
-            }
-          })
-          .join("") + ".";
       try {
-        const capitalisedNotice = notice.startsWith("you sent ")
-          ? `Y${notice.slice(1)}`
-          : notice;
-        await author.send(capitalisedNotice);
+        await author.send({
+          embeds: notices,
+        });
       } catch (err) {
         const repostMessage = await message.channel.send({
-          content: `${author}, ${notice} (I couldn't DM you!)`,
+          content: `${author} (I couldn't DM you!)`,
+          embeds: notices,
           allowedMentions: { users: [author.id] },
         });
         await delay(10000);
