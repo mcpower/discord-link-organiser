@@ -282,7 +282,7 @@ export class GirlsClient {
           content: `${author}, ${notice} (I couldn't DM you!)`,
           allowedMentions: { users: [author.id] },
         });
-        await delay(8000);
+        await delay(10000);
         await repostMessage.delete();
       }
     })();
