@@ -130,6 +130,19 @@ export class Message {
   }
 
   async fetchReposts(em: EM): Promise<(TwitterLink | PixivLink)[]> {
+    // TODO: This exhibits the N+1 queries problem - more specifically, (number
+    // of links) queries. We can do ALL of the below in (number of types of
+    // links) queries instead with some joins.  Something like:
+    //
+    // select t2.*, m2.*
+    // from twitter_link as t1
+    // left join twitter_link as t2 on t2.twitter_id = t1.twitter_id
+    // left join message as m2 on m2.id = t2.message_id
+    // where t1.message_id = ?
+    // and t2.channel = t1.channel
+    // and t2.created < t1.created
+    //
+    // Most ORMs can't handle this... and (number of links) is almost always 1.
     const nestedLinks = await Promise.all(
       [this.twitterLinks, this.pixivLinks].map(async (collection) => {
         const links = await collection.loadItems();
