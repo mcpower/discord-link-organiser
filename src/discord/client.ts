@@ -44,13 +44,13 @@ export class GirlsClient {
       this.channelLock.enqueue(() => this.ready(client));
     });
     this.client.on("messageCreate", (message) => {
-      if (GirlsClient.shouldIgnore(message)) {
+      if (this.shouldIgnore(message)) {
         return;
       }
       this.channelLock.enqueue(() => this.messageCreate(message));
     });
     this.client.on("messageUpdate", (oldMessage, newMessage) => {
-      if (GirlsClient.shouldIgnore(newMessage)) {
+      if (this.shouldIgnore(newMessage)) {
         return;
       }
       this.channelLock.enqueue(() =>
@@ -58,7 +58,7 @@ export class GirlsClient {
       );
     });
     this.client.on("messageDelete", (message) => {
-      if (GirlsClient.shouldIgnore(message)) {
+      if (this.shouldIgnore(message)) {
         return;
       }
       // If message type is unknown, try deleting it anyway.
@@ -66,7 +66,7 @@ export class GirlsClient {
     });
     this.client.on("messageDeleteBulk", (messages) => {
       for (const message of messages.values()) {
-        if (GirlsClient.shouldIgnore(message)) {
+        if (this.shouldIgnore(message)) {
           continue;
         }
         // If message type is unknown, try deleting it anyway.
@@ -78,14 +78,18 @@ export class GirlsClient {
     }
   }
 
-  static shouldIgnore(message: Message | PartialMessage) {
+  shouldIgnore(message: Message | PartialMessage) {
     // This is on the permissive side - if the message type is unknown, allow
     // it.
+    const thisUser = this.client.user?.id;
     return (
       message.channelId !== config.channelId ||
       (message.type !== null &&
         message.type !== "DEFAULT" &&
-        message.type !== "REPLY")
+        message.type !== "REPLY") ||
+      (message.author !== null &&
+        thisUser !== undefined &&
+        message.author.id === thisUser)
     );
   }
 
@@ -99,7 +103,7 @@ export class GirlsClient {
     console.log(`ready: getting all messages from ${lastMessage}`);
     const messageIds: Snowflake[] = [];
     for await (const message of getAllMessages(channel.messages, lastMessage)) {
-      if (GirlsClient.shouldIgnore(message)) {
+      if (this.shouldIgnore(message)) {
         continue;
       }
       const dbMessage = toDbMessageAndPopulate(message);
@@ -167,7 +171,7 @@ export class GirlsClient {
         return;
       }
 
-      if (GirlsClient.shouldIgnore(newMessage)) {
+      if (this.shouldIgnore(newMessage)) {
         return;
       }
       dbMessage = toDbMessageAndPopulate(newMessage);
@@ -240,14 +244,45 @@ export class GirlsClient {
     // The author is probably in the cache.
     void (async () => {
       const author = await this.client.users.fetch(dbMessage.author);
+      const notices = await Promise.all(
+        reposts.map(async (link) => {
+          const linkMessage = link.message.getEntity();
+          const createdSecs = Math.round(link.created / 1000);
+          let author = "you";
+          if (linkMessage.author !== dbMessage.author) {
+            author = (await this.client.users.fetch(linkMessage.author))
+              .username;
+          }
+          return `${author} sent <${link.url}> <t:${createdSecs}:R> (<${linkMessage.url}>)`;
+        })
+      );
+      // you sent X Y ago (Z) and A sent B C ago (D).
+      const notice =
+        notices
+          .map((notice, i) => {
+            switch (i) {
+              case 0:
+                return notice;
+
+              case notices.length - 1:
+                return `and ${notice}`;
+
+              default:
+                return `, ${notice}`;
+            }
+          })
+          .join("") + ".";
       try {
-        await author.send("Your last message had a repost.");
+        const capitalisedNotice = notice.startsWith("you sent ")
+          ? `Y${notice.slice(1)}`
+          : notice;
+        await author.send(capitalisedNotice);
       } catch (err) {
         const repostMessage = await message.channel.send({
-          content: `${author}, your last message had a repost. (I couldn't DM you!)`,
+          content: `${author}, ${notice} (I couldn't DM you!)`,
           allowedMentions: { users: [author.id] },
         });
-        await delay(3000);
+        await delay(8000);
         await repostMessage.delete();
       }
     })();
