@@ -14,6 +14,7 @@ import { Message as DbMessage } from "../entities";
 import { EM, getEm } from "../orm";
 import { delay } from "../utils/delay";
 import { LockQueue } from "../utils/LockQueue";
+import { URL_REGEX } from "../url";
 
 export class GirlsClient {
   client: Client;
@@ -129,7 +130,7 @@ export class GirlsClient {
     }
     const dbMessage = toDbMessageAndPopulate(message);
     await em.persistAndFlush(dbMessage);
-    await this.handleReposts(em, message, dbMessage);
+    await this.handleViolations(em, message, dbMessage);
   }
 
   async messageUpdate(
@@ -210,14 +211,23 @@ export class GirlsClient {
     }
 
     await em.flush();
-    await this.handleReposts(em, newMessage, dbMessage);
+    await this.handleViolations(em, newMessage, dbMessage);
   }
 
-  async handleReposts(
+  async handleViolations(
     em: EM,
     message: Message | PartialMessage,
     dbMessage: DbMessage
   ) {
+    const notices: string[] = [];
+    // Manually use URL_REGEX here as we don't store plain links.
+    if (
+      config.deleteNoImages &&
+      dbMessage.attachments === 0 &&
+      dbMessage.content.match(URL_REGEX) === null
+    ) {
+      notices.push("Your message had no links or attachments.");
+    }
     let reposts = await dbMessage.fetchReposts(em);
 
     // TODO: move the below constant somewhere else
@@ -228,9 +238,25 @@ export class GirlsClient {
     reposts = reposts.filter(
       (link) => link.message.getEntity().updated > repostCutoff
     );
-    if (reposts.length === 0) {
+    const repostNotices = await Promise.all(
+      reposts.map(async (link) => {
+        const linkMessage = link.message.getEntity();
+        const createdSecs = Math.round(link.created / 1000);
+        let author = "You";
+        if (linkMessage.author !== dbMessage.author) {
+          author = (
+            await this.client.users.fetch(linkMessage.author)
+          ).toString();
+        }
+        return `${author} sent ${link.url} <t:${createdSecs}:R> ([message](${linkMessage.url})).`;
+      })
+    );
+    notices.push(...repostNotices);
+
+    if (notices.length === 0) {
       return;
     }
+
     console.log(`reposts: deleting ${message.id}`);
     // Delete and send DM.
     // DON'T await Discord-related promises - these don't touch the database and
@@ -255,34 +281,22 @@ export class GirlsClient {
       }
       // The author is probably in the cache.
       const author = await this.client.users.fetch(dbMessage.author);
-      const notices: MessageEmbedOptions[] = await Promise.all(
-        reposts.map(async (link) => {
-          const linkMessage = link.message.getEntity();
-          const createdSecs = Math.round(link.created / 1000);
-          let author = "You";
-          if (linkMessage.author !== dbMessage.author) {
-            author = (
-              await this.client.users.fetch(linkMessage.author)
-            ).toString();
-          }
-          return {
-            description: `${author} sent ${link.url} <t:${createdSecs}:R> ([message](${linkMessage.url})).`,
-          };
-        })
-      );
       if (!deleted) {
-        notices.push({
-          description: `Please delete [your message](${dbMessage.url}) if I didn't make a mistake!`,
-        });
+        notices.push(
+          `Please delete [your message](${dbMessage.url}) if I didn't make a mistake!`
+        );
       }
+      const embeds: MessageEmbedOptions[] = notices.map((notice) => ({
+        description: notice,
+      }));
       try {
         await author.send({
-          embeds: notices,
+          embeds,
         });
       } catch (err) {
         const repostMessage = await message.channel.send({
           content: `${author}, I couldn't DM you!`,
-          embeds: notices,
+          embeds,
           allowedMentions: { users: [author.id] },
         });
         await delay(10000);
