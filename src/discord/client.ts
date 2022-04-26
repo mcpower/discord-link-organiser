@@ -242,20 +242,18 @@ export class GirlsClient {
     // However... if the delete DIDN'T work, the message will be lost forever.
     // This is bad! The race here is okay to work around that.
     void (async () => {
+      let deleted = false;
       try {
         await message.delete();
+        deleted = true;
       } catch (err: unknown) {
         // Check for "lack permissions" code:
         // https://discord.com/developers/docs/topics/opcodes-and-status-codes#json-json-error-codes
-        if (err instanceof DiscordAPIError && err.code === 50013) {
-          return;
+        if (!(err instanceof DiscordAPIError && err.code === 50013)) {
+          console.log(`reposts: error when deleting ${message.id}`, err);
         }
-        console.log(`reposts: error when deleting ${message.id}`, err);
-        return;
       }
-    })();
-    // The author is probably in the cache.
-    void (async () => {
+      // The author is probably in the cache.
       const author = await this.client.users.fetch(dbMessage.author);
       const notices: MessageEmbedOptions[] = await Promise.all(
         reposts.map(async (link) => {
@@ -272,13 +270,18 @@ export class GirlsClient {
           };
         })
       );
+      if (!deleted) {
+        notices.push({
+          description: `Please delete [your message](${dbMessage.url}) if I didn't make a mistake!`,
+        });
+      }
       try {
         await author.send({
           embeds: notices,
         });
       } catch (err) {
         const repostMessage = await message.channel.send({
-          content: `${author} (I couldn't DM you!)`,
+          content: `${author}, I couldn't DM you!`,
           embeds: notices,
           allowedMentions: { users: [author.id] },
         });
