@@ -3,6 +3,7 @@ import {
   DiscordAPIError,
   Intents,
   Message,
+  MessageEmbedOptions,
   PartialMessage,
   Snowflake,
 } from "discord.js";
@@ -256,7 +257,7 @@ export class GirlsClient {
     // The author is probably in the cache.
     void (async () => {
       const author = await this.client.users.fetch(dbMessage.author);
-      const notices = await Promise.all(
+      const notices: MessageEmbedOptions[] = await Promise.all(
         reposts.map(async (link) => {
           const linkMessage = link.message.getEntity();
           const createdSecs = Math.round(link.created / 1000);
@@ -267,7 +268,7 @@ export class GirlsClient {
             ).toString();
           }
           return {
-            description: `${author} sent ${link.url} [<t:${createdSecs}:R>](${linkMessage.url}).`,
+            description: `${author} sent ${link.url} <t:${createdSecs}:R> ([message](${linkMessage.url})).`,
           };
         })
       );
