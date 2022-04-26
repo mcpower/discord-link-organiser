@@ -50,7 +50,7 @@ export class TwitterLink {
   }
 
   get url(): string {
-    return `https://twitter.com/i/web/status/${this.twitterId}`;
+    return `https://twitter.com/_/status/${this.twitterId}`;
   }
 
   async lastLink(em: EM): Promise<TwitterLink | undefined> {
