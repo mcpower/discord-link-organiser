@@ -8,8 +8,9 @@ if (false) {
   isType<{
     token: string;
     channelId: string;
-    debug: boolean;
     deleteNoImages: boolean;
+    ormDebug: boolean;
+    discordDebug: boolean;
   }>(config);
 }
 

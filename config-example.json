@@ -2,5 +2,6 @@
   "token": "your-token-goes-here",
   "channelId": "777777777777777777",
   "deleteNoImages": true,
-  "debug": false
+  "ormDebug": false,
+  "discordDebug": false
 }

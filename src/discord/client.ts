@@ -75,7 +75,7 @@ export class GirlsClient {
         this.channelLock.enqueue(() => this.messageDelete(message));
       }
     });
-    if (config.debug) {
+    if (config.discordDebug) {
       this.client.on("debug", console.log);
     }
   }
