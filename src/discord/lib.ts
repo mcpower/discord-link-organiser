@@ -4,7 +4,10 @@ import { compareBigints } from "../utils/bigints";
 
 const MAX_MESSAGES_PER_FETCH = 100;
 
-export function toDbMessage(message: Message): DbMessage {
+export function toDbMessage(
+  message: Message,
+  lastReadyTimestamp?: number
+): DbMessage {
   const {
     id,
     guildId,
@@ -24,11 +27,15 @@ export function toDbMessage(message: Message): DbMessage {
     attachments: attachments.size,
     created: createdTimestamp,
     edited: editedTimestamp === null ? undefined : editedTimestamp,
+    lastReadyTimestamp,
   });
 }
 
-export function toDbMessageAndPopulate(message: Message): DbMessage {
-  const dbMessage = toDbMessage(message);
+export function toDbMessageAndPopulate(
+  message: Message,
+  lastReadyTimestamp?: number
+): DbMessage {
+  const dbMessage = toDbMessage(message, lastReadyTimestamp);
   dbMessage.populateLinks();
   return dbMessage;
 }

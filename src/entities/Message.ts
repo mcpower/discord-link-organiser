@@ -42,6 +42,10 @@ export class Message {
   @Property()
   created: number;
 
+  // The last readyTimestamp of the client that retrieved this.
+  @Property()
+  lastReadyTimestamp?: number;
+
   // Could change on edit.
   @Property()
   edited?: number;
@@ -80,6 +84,7 @@ export class Message {
     attachments,
     created,
     edited,
+    lastReadyTimestamp,
   }: {
     id: string;
     guild: string | undefined;
@@ -89,6 +94,7 @@ export class Message {
     attachments: number;
     created: number;
     edited: number | undefined;
+    lastReadyTimestamp?: number;
   }) {
     this.id = id;
     this.guild = guild;
@@ -98,6 +104,7 @@ export class Message {
     this.edited = edited;
     this.content = content;
     this.attachments = attachments;
+    this.lastReadyTimestamp = lastReadyTimestamp;
   }
 
   populateLinks() {

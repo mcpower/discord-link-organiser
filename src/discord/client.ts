@@ -108,7 +108,7 @@ export class GirlsClient {
       if (this.shouldIgnore(message)) {
         continue;
       }
-      const dbMessage = toDbMessageAndPopulate(message);
+      const dbMessage = toDbMessageAndPopulate(message, client.readyTimestamp);
       em.persist(dbMessage);
       messageIds.push(message.id);
     }
@@ -128,9 +128,56 @@ export class GirlsClient {
       console.log(`create: ${message.id} was already in DB`);
       return;
     }
-    const dbMessage = toDbMessageAndPopulate(message);
+    const dbMessage = toDbMessageAndPopulate(
+      message,
+      this.client.readyTimestamp ?? undefined
+    );
     await em.persistAndFlush(dbMessage);
     await this.handleViolations(em, message, dbMessage);
+  }
+
+  /**
+   * Updates an existing dbMessage based on newMessage. dbMessage must already
+   * exist inside the database. This function does NOT flush the entity manager.
+   * This function guarantees that dbMessage.lastReadyTimestamp is updated.
+   */
+  async updateDbMessage(
+    em: EM,
+    dbMessage: DbMessage,
+    message: Message | PartialMessage,
+    readyTimestamp?: number
+  ) {
+    dbMessage.lastReadyTimestamp =
+      readyTimestamp ?? this.client.readyTimestamp ?? undefined;
+    // If nothing interesting was changed, do nothing. Yes, we don't even
+    // update the edited timestamp, as there's no point.
+    if (message.content === null || message.content === dbMessage.content) {
+      return;
+    }
+    // If we somehow already have a more-up-to-date version of this message in
+    // our database, ignore this edit.
+    if (
+      message.editedTimestamp !== null &&
+      dbMessage.edited !== undefined &&
+      message.editedTimestamp <= dbMessage.edited
+    ) {
+      console.log(
+        `update: message ${message.id} was older (${message.editedTimestamp}) than db (${dbMessage.edited})`
+      );
+      return;
+    }
+
+    // Update content and editedTimestamp.
+    // Populating dbMessage is necessary to ensure twitterLinks and pixivLinks
+    // get correctly cleared.
+    await em.populate(dbMessage, true);
+    dbMessage.content = message.content;
+    if (message.editedTimestamp) {
+      dbMessage.setEdited(message.editedTimestamp);
+    }
+    dbMessage.twitterLinks.removeAll();
+    dbMessage.pixivLinks.removeAll();
+    dbMessage.populateLinks();
   }
 
   async messageUpdate(
@@ -176,38 +223,13 @@ export class GirlsClient {
       if (this.shouldIgnore(newMessage)) {
         return;
       }
-      dbMessage = toDbMessageAndPopulate(newMessage);
+      dbMessage = toDbMessageAndPopulate(
+        newMessage,
+        this.client.readyTimestamp ?? undefined
+      );
       em.persist(dbMessage);
     } else {
-      // If nothing interesting was changed, do nothing. Yes, we don't even
-      // update the edited timestamp, as there's no point.
-      if (newMessage.content === dbMessage.content) {
-        return;
-      }
-      // If we somehow already have a more-up-to-date version of this message in
-      // our database, ignore this edit.
-      if (
-        newMessage.editedTimestamp !== null &&
-        dbMessage.edited !== undefined &&
-        newMessage.editedTimestamp <= dbMessage.edited
-      ) {
-        console.log(
-          `update: message ${newMessage.id} was older (${newMessage.editedTimestamp}) than db (${dbMessage.edited})`
-        );
-        return;
-      }
-
-      // Update content and editedTimestamp.
-      // Populating dbMessage is necessary to ensure twitterLinks and pixivLinks
-      // get correctly cleared.
-      await em.populate(dbMessage, true);
-      dbMessage.content = newMessage.content;
-      if (newMessage.editedTimestamp) {
-        dbMessage.setEdited(newMessage.editedTimestamp);
-      }
-      dbMessage.twitterLinks.removeAll();
-      dbMessage.pixivLinks.removeAll();
-      dbMessage.populateLinks();
+      await this.updateDbMessage(em, dbMessage, newMessage);
     }
 
     await em.flush();
@@ -228,16 +250,102 @@ export class GirlsClient {
     ) {
       notices.push("Your message had no links or attachments.");
     }
-    let reposts = await dbMessage.fetchReposts(em);
-
     // TODO: move the below constant somewhere else
     const repostCutoff = Date.now() - (1000 * 60 * 60 * 24 * 365) / 2;
 
-    // fetchReposts guarantees the message is loaded.
-    // TODO: filter this inside the database query instead (if possible)
-    reposts = reposts.filter(
-      (link) => link.message.getEntity().updated > repostCutoff
-    );
+    // Guarantee that readyTimestamp is available.
+    const readyTimestamp = this.client.readyTimestamp;
+    if (readyTimestamp === null) {
+      console.error("reposts: readyTimestamp is null? aborting");
+      return;
+    }
+
+    let reposts: Awaited<ReturnType<DbMessage["fetchReposts"]>>;
+    // Messages that we've fetched successfully (whether it's deleted or not).
+    const fetchedIds = new Set<Snowflake>();
+    // Messages that failed to fetch.
+    const failedIds = new Set<Snowflake>();
+    while (true) {
+      reposts = await dbMessage.fetchReposts(em);
+      // fetchReposts guarantees the message is loaded.
+      // TODO: filter this inside the database query instead (if possible)
+      reposts = reposts.filter((link) => {
+        const linkMessage = link.message.getEntity();
+        return (
+          linkMessage.updated > repostCutoff && !failedIds.has(linkMessage.id)
+        );
+      });
+      const messages = [
+        ...new Map(
+          reposts
+            .map((link) => link.message.getEntity())
+            .map((message) => [message.id, message])
+        ).values(),
+      ];
+      const messagesToFetch = messages.filter(
+        (message) =>
+          message.lastReadyTimestamp === undefined ||
+          message.lastReadyTimestamp !== readyTimestamp
+      );
+
+      if (messagesToFetch.length === 0) {
+        break;
+      }
+      const alreadyFetched = messagesToFetch
+        .map(({ id }) => id)
+        .filter((id) => fetchedIds.has(id));
+      if (alreadyFetched.length > 0) {
+        console.error(
+          `reposts: attempting to fetch ${JSON.stringify(
+            alreadyFetched
+          )} which were previously fetched (this should never happen)`
+        );
+        return;
+      }
+      await Promise.all(
+        messagesToFetch.map(async (messageToFetch) => {
+          console.log(`reposts: fetching ${messageToFetch.id}`);
+          try {
+            const fetched = await message.channel.messages.fetch(
+              messageToFetch.id
+            );
+
+            // Pass in the readyTimestamp from before so we're guaranteed that
+            // it doesn't change between iterations.
+            await this.updateDbMessage(
+              em,
+              messageToFetch,
+              fetched,
+              readyTimestamp
+            );
+            fetchedIds.add(messageToFetch.id);
+          } catch (err: unknown) {
+            // The message was probably deleted.
+            // Check for "unknown message" code:
+            // https://discord.com/developers/docs/topics/opcodes-and-status-codes#json-json-error-codes
+            if (err instanceof DiscordAPIError && err.code === 10008) {
+              fetchedIds.add(messageToFetch.id);
+              // We need to cascade delete the link entity from the ORM... or
+              // else the link entity still exists within the ORM, which points
+              // to the original entity, so it gets revived next time we flush.
+              // Unfortunately, that means we need to explicitly populate this.
+              await em.populate(messageToFetch, true);
+              em.remove(messageToFetch);
+              return;
+            }
+            console.error(
+              `reposts: error when fetching ${messageToFetch.id}. ignoring`,
+              err
+            );
+            failedIds.add(messageToFetch.id);
+            return;
+          }
+        })
+      );
+
+      await em.flush();
+    }
+
     const repostNotices = await Promise.all(
       reposts.map(async (link) => {
         const linkMessage = link.message.getEntity();
