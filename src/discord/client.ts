@@ -286,9 +286,11 @@ export class GirlsClient {
           `Please delete [your message](${dbMessage.url}) if I didn't make a mistake!`
         );
       }
-      const embeds: MessageEmbedOptions[] = notices.map((notice) => ({
-        description: notice,
-      }));
+      const embeds: MessageEmbedOptions[] = [
+        {
+          description: notices.join("\n"),
+        },
+      ];
       try {
         await author.send({
           embeds,
