@@ -192,17 +192,6 @@ export class GirlsClient {
     // don't need to check channelId in this method.
     console.log(`update: message ${newMessage.id}`);
 
-    if (newMessage.content === null) {
-      // Nothing interesting changed - ignore.
-      return;
-    }
-    if (newMessage.editedTimestamp === null) {
-      // This should never happen, but we should handle this case anyway.
-      console.log(
-        `update: ${newMessage.id} had updated content ${newMessage.content} but no editedTimestamp`
-      );
-    }
-
     const em = await getEm();
     let dbMessage = await em.findOne(DbMessage, newMessage.id);
 
