@@ -140,19 +140,20 @@ export class GirlsClient {
    * Updates an existing dbMessage based on newMessage. dbMessage must already
    * exist inside the database. This function does NOT flush the entity manager.
    * This function guarantees that dbMessage.lastReadyTimestamp is updated.
+   * @returns Whether dbMessage was updated or not.
    */
   async updateDbMessage(
     em: EM,
     dbMessage: DbMessage,
     message: Message | PartialMessage,
     readyTimestamp?: number
-  ) {
+  ): Promise<boolean> {
     dbMessage.lastReadyTimestamp =
       readyTimestamp ?? this.client.readyTimestamp ?? undefined;
     // If nothing interesting was changed, do nothing. Yes, we don't even
     // update the edited timestamp, as there's no point.
     if (message.content === null || message.content === dbMessage.content) {
-      return;
+      return false;
     }
     // If we somehow already have a more-up-to-date version of this message in
     // our database, ignore this edit.
@@ -164,7 +165,7 @@ export class GirlsClient {
       console.log(
         `update: message ${message.id} was older (${message.editedTimestamp}) than db (${dbMessage.edited})`
       );
-      return;
+      return false;
     }
 
     // Update content and editedTimestamp.
@@ -178,6 +179,7 @@ export class GirlsClient {
     dbMessage.twitterLinks.removeAll();
     dbMessage.pixivLinks.removeAll();
     dbMessage.populateLinks();
+    return true;
   }
 
   async messageUpdate(
@@ -218,7 +220,11 @@ export class GirlsClient {
       );
       em.persist(dbMessage);
     } else {
-      await this.updateDbMessage(em, dbMessage, newMessage);
+      // If nothing was updated, don't handle violations.
+      if (!(await this.updateDbMessage(em, dbMessage, newMessage))) {
+        await em.flush();
+        return;
+      }
     }
 
     await em.flush();
