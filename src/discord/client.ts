@@ -1,5 +1,6 @@
 import {
   Client,
+  CommandInteraction,
   DiscordAPIError,
   Intents,
   Message,
@@ -10,7 +11,7 @@ import {
 import * as config from "../config";
 import assert from "assert";
 import { getAllMessages, toDbMessageAndPopulate } from "./lib";
-import { Message as DbMessage } from "../entities";
+import { Message as DbMessage, User as DbUser } from "../entities";
 import { EM, getEm } from "../orm";
 import { delay } from "../utils/delay";
 import { LockQueue } from "../utils/LockQueue";
@@ -20,8 +21,9 @@ export class GirlsClient {
   client: Client;
   /**
    * Lock queue for the channel.
-   * Used to prevent races which may occur when multiple async functions
-   * relating to the same channel run simultaneously.
+   * Used to prevent race conditions - mostly ones relating to the database -
+   * which may occur when multiple async functions relating to the same channel
+   * run simultaneously.
    * (We only support one channel as of writing...)
    */
   channelLock: LockQueue;
@@ -51,6 +53,42 @@ export class GirlsClient {
       }
       this.channelLock.enqueue(() => this.messageCreate(message));
     });
+    this.client.on("interactionCreate", (interaction) => {
+      if (!interaction.isCommand()) {
+        return;
+      }
+      if (interaction.guildId !== config.guildId) {
+        void interaction.reply({
+          content: "Error: unknown guild.",
+          ephemeral: true,
+        });
+        return;
+      }
+      if (interaction.channelId !== config.channelId) {
+        void interaction.reply({
+          content: `Error: commands must be used in <#${config.channelId}>.`,
+          ephemeral: true,
+        });
+        return;
+      }
+
+      // lol. lmao.
+      const options = interaction.options;
+      if (
+        interaction.commandName !== "girls" ||
+        options.getSubcommandGroup(false) !== "config" ||
+        options.getSubcommand(false) !== "six-month"
+      ) {
+        void interaction.reply({
+          content: "Error: unknown command.",
+          ephemeral: true,
+        });
+        return;
+      }
+
+      // TODO: chuck this in a per-user queue instead of the channel
+      this.channelLock.enqueue(() => this.configSixMonth(interaction));
+    });
     this.client.on("messageUpdate", (oldMessage, newMessage) => {
       if (this.shouldIgnore(newMessage)) {
         return;
@@ -78,6 +116,21 @@ export class GirlsClient {
     if (config.discordDebug) {
       this.client.on("debug", console.log);
     }
+  }
+
+  async configSixMonth(interaction: CommandInteraction) {
+    const em = await getEm();
+    let dbUser = await em.findOne(DbUser, interaction.user.id);
+    if (dbUser === null) {
+      dbUser = new DbUser(interaction.user.id);
+      em.persist(dbUser);
+    }
+    dbUser.sixMonthDelete = interaction.options.getBoolean("delete", true);
+    await em.flush();
+    const content = dbUser.sixMonthDelete
+      ? "Success: girls will now delete your reposts, even if they're old links."
+      : "Success: girls will stop deleting your reposts of old links.";
+    await interaction.reply({ content, ephemeral: true });
   }
 
   shouldIgnore(message: Message | PartialMessage) {
@@ -254,6 +307,12 @@ export class GirlsClient {
       console.error("reposts: readyTimestamp is null? aborting");
       return;
     }
+    let dbUser = await em.findOne(DbUser, dbMessage.author);
+    if (dbUser === null) {
+      // Do not persist this new dbUser - we just use it for getting the default
+      // values of options.
+      dbUser = new DbUser(dbMessage.author);
+    }
 
     let reposts: Awaited<ReturnType<DbMessage["fetchReposts"]>>;
     // Messages that we've fetched successfully (whether it's deleted or not).
@@ -264,12 +323,14 @@ export class GirlsClient {
       reposts = await dbMessage.fetchReposts(em);
       // fetchReposts guarantees the message is loaded.
       // TODO: filter this inside the database query instead (if possible)
-      reposts = reposts.filter((link) => {
-        const linkMessage = link.message.getEntity();
-        return (
-          linkMessage.updated > repostCutoff && !failedIds.has(linkMessage.id)
-        );
-      });
+      if (!dbUser.sixMonthDelete) {
+        reposts = reposts.filter((link) => {
+          const linkMessage = link.message.getEntity();
+          return (
+            linkMessage.updated > repostCutoff && !failedIds.has(linkMessage.id)
+          );
+        });
+      }
       const messages = [
         ...new Map(
           reposts

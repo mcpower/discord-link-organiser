@@ -1,6 +1,12 @@
 import { Message, MessageManager } from "discord.js";
 import { Message as DbMessage } from "../entities";
 import { compareBigints } from "../utils/bigints";
+import { REST } from "@discordjs/rest";
+import config from "../config";
+import {
+  RESTPostAPIApplicationCommandsJSONBody,
+  Routes,
+} from "discord-api-types/v9";
 
 const MAX_MESSAGES_PER_FETCH = 100;
 
@@ -68,4 +74,16 @@ export async function* getAllMessages(
       break;
     }
   }
+}
+
+export async function putGuildCommands(
+  commands: RESTPostAPIApplicationCommandsJSONBody[]
+) {
+  const rest = new REST({ version: "9" }).setToken(config.token);
+  const route = Routes.applicationGuildCommands(
+    config.applicationId,
+    config.guildId
+  );
+
+  await rest.put(route, { body: commands });
 }

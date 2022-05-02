@@ -1,6 +1,8 @@
 {
   "token": "your-token-goes-here",
   "channelId": "777777777777777777",
+  "guildId": "777777777777777777",
+  "applicationId": "777777777777777777",
   "deleteNoImages": true,
   "ormDebug": false,
   "discordDebug": false

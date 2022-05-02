@@ -8,6 +8,8 @@ if (false) {
   isType<{
     token: string;
     channelId: string;
+    guildId: string;
+    applicationId: string;
     deleteNoImages: boolean;
     ormDebug: boolean;
     discordDebug: boolean;
