@@ -17,6 +17,7 @@ import { EM, getEm } from "../orm";
 import { delay } from "../utils/delay";
 import { LockQueue } from "../utils/LockQueue";
 import { URL_REGEX } from "../url";
+import { isHewo } from "../utils/isHewo";
 
 export class GirlsClient {
   client: Client;
@@ -290,6 +291,14 @@ export class GirlsClient {
     message: Message | PartialMessage,
     dbMessage: DbMessage
   ) {
+    if (
+      isHewo(dbMessage.content) &&
+      // This should be caught by the below bot check, but juuust to be sure.
+      dbMessage.author !== config.applicationId &&
+      (await this.client.users.fetch(dbMessage.author)).bot
+    ) {
+      return;
+    }
     const notices: string[] = [];
     let shouldDelete = false;
     // Manually use URL_REGEX here as we don't store plain links.
