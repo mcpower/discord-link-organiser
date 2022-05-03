@@ -306,7 +306,7 @@ export class GirlsClient {
       // last hewo must be at least 10 seconds ago
       // don't update lastHewo if this attempt didn't work
       if (this.lastHewo + 1000 * 10 < thisHewo) {
-        void message.reply(`HE\u2060WO ${author}`);
+        void message.channel.send(`HE\u2060WO ${author}`);
         this.lastHewo = thisHewo;
       }
       return;
