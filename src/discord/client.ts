@@ -6,6 +6,7 @@ import {
   Message,
   MessageEmbedOptions,
   PartialMessage,
+  Permissions,
   Snowflake,
 } from "discord.js";
 import * as config from "../config";
@@ -290,12 +291,36 @@ export class GirlsClient {
     dbMessage: DbMessage
   ) {
     const notices: string[] = [];
+    let shouldDelete = false;
     // Manually use URL_REGEX here as we don't store plain links.
     if (
       config.deleteNoImages &&
       dbMessage.attachments === 0 &&
       dbMessage.content.match(URL_REGEX) === null
     ) {
+      let member = message.member;
+      if (member === null) {
+        try {
+          member = await (
+            await this.client.guilds.fetch(config.guildId)
+          ).members.fetch(dbMessage.author);
+        } catch (e) {
+          // This probably shouldn't happen - but gracefully fail anyway.
+          console.log(`reposts: user ${dbMessage.author} missing from guild`);
+        }
+      }
+      if (
+        !(
+          member &&
+          message.inGuild() &&
+          // We could use permissionsIn, but that's probably overkill
+          // (and adds some API overhead).
+          member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)
+        )
+      ) {
+        shouldDelete = true;
+      }
+
       notices.push("Your message had no links or attachments.");
     }
     // TODO: move the below constant somewhere else
@@ -415,13 +440,18 @@ export class GirlsClient {
         return `${author} sent ${link.url} <t:${createdSecs}:R> ([message](${linkMessage.url})).`;
       })
     );
+    if (repostNotices.length > 0) {
+      shouldDelete = true;
+    }
     notices.push(...repostNotices);
 
     if (notices.length === 0) {
       return;
     }
 
-    console.log(`reposts: deleting ${message.id}`);
+    console.log(
+      `reposts: ${shouldDelete ? "deleting" : "handling"} ${message.id}`
+    );
     // Delete and send DM.
     // DON'T await Discord-related promises - these don't touch the database and
     // we don't want to block the entire channel's queue as it's for database,
@@ -432,20 +462,20 @@ export class GirlsClient {
     // However... if the delete DIDN'T work, the message will be lost forever.
     // This is bad! The race here is okay to work around that.
     void (async () => {
-      let deleted = false;
-      try {
-        await message.delete();
-        deleted = true;
-      } catch (err: unknown) {
-        // Check for "lack permissions" code:
-        // https://discord.com/developers/docs/topics/opcodes-and-status-codes#json-json-error-codes
-        if (!(err instanceof DiscordAPIError && err.code === 50013)) {
-          console.log(`reposts: error when deleting ${message.id}`, err);
+      let deleteFailed = false;
+      if (shouldDelete) {
+        try {
+          await message.delete();
+        } catch (err: unknown) {
+          // Check for "lack permissions" code:
+          // https://discord.com/developers/docs/topics/opcodes-and-status-codes#json-json-error-codes
+          if (!(err instanceof DiscordAPIError && err.code === 50013)) {
+            console.log(`reposts: error when deleting ${message.id}`, err);
+          }
+          deleteFailed = true;
         }
       }
-      // The author is probably in the cache.
-      const author = await this.client.users.fetch(dbMessage.author);
-      if (!deleted) {
+      if (deleteFailed) {
         notices.push(
           `Please delete [your message](${dbMessage.url}) if I didn't make a mistake!`
         );
@@ -455,6 +485,8 @@ export class GirlsClient {
           description: notices.join("\n"),
         },
       ];
+      // The author is probably in the cache.
+      const author = await this.client.users.fetch(dbMessage.author);
       try {
         await author.send({
           embeds,
