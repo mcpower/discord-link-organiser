@@ -303,11 +303,12 @@ export class GirlsClient {
       author.bot
     ) {
       const thisHewo = Date.now();
-      // 10 seconds between hewos
+      // last hewo must be at least 10 seconds ago
+      // don't update lastHewo if this attempt didn't work
       if (this.lastHewo + 1000 * 10 < thisHewo) {
         void message.reply(`HE\u2060WO ${author}`);
+        this.lastHewo = thisHewo;
       }
-      this.lastHewo = thisHewo;
       return;
     }
     const notices: string[] = [];
