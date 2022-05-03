@@ -30,6 +30,8 @@ export class GirlsClient {
    */
   channelLock: LockQueue;
 
+  lastHewo: number;
+
   constructor() {
     this.client = new Client({
       intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
@@ -44,6 +46,7 @@ export class GirlsClient {
       ],
     });
     this.channelLock = new LockQueue();
+    this.lastHewo = 0;
 
     this.client.on("ready", (client) => {
       // Note that this gets really messy if we support multiple channels...
@@ -291,12 +294,20 @@ export class GirlsClient {
     message: Message | PartialMessage,
     dbMessage: DbMessage
   ) {
+    // The author is probably in the cache.
+    const author = await this.client.users.fetch(dbMessage.author);
     if (
       isHewo(dbMessage.content) &&
       // This should be caught by the below bot check, but juuust to be sure.
       dbMessage.author !== config.applicationId &&
-      (await this.client.users.fetch(dbMessage.author)).bot
+      author.bot
     ) {
+      const thisHewo = Date.now();
+      // 10 seconds between hewos
+      if (this.lastHewo + 1000 * 10 < thisHewo) {
+        void message.reply(`HE\u2060WO ${author}`);
+      }
+      this.lastHewo = thisHewo;
       return;
     }
     const notices: string[] = [];
@@ -494,8 +505,6 @@ export class GirlsClient {
           description: notices.join("\n"),
         },
       ];
-      // The author is probably in the cache.
-      const author = await this.client.users.fetch(dbMessage.author);
       try {
         await author.send({
           embeds,
