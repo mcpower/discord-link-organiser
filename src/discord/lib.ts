@@ -1,12 +1,13 @@
-import { Message, MessageManager } from "discord.js";
-import { Message as DbMessage } from "../entities";
-import { compareBigints } from "../utils/bigints";
-import { REST } from "@discordjs/rest";
-import config from "../config";
 import {
+  Message,
+  MessageManager,
+  REST,
   RESTPostAPIApplicationCommandsJSONBody,
   Routes,
-} from "discord-api-types/v9";
+} from "discord.js";
+import { Message as DbMessage } from "../entities";
+import { compareBigints } from "../utils/bigints";
+import config from "../config";
 
 const MAX_MESSAGES_PER_FETCH = 100;
 
