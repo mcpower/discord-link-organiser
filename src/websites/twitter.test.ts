@@ -8,6 +8,11 @@ describe("parseTwitterUrl", () => {
     expect(parseTwitterUrl(new URL(girl))).toBe("1480872116660494338");
   });
 
+  test("works when you forget to remove the slash", () => {
+    const girl = "https://twitter.com/WD0706/status/1480872116660494338/";
+    expect(parseTwitterUrl(new URL(girl))).toBe("1480872116660494338");
+  });
+
   test("works with another URL format", () => {
     const girl = "https://twitter.com/i/web/status/1480872116660494338";
     expect(parseTwitterUrl(new URL(girl))).toBe("1480872116660494338");
