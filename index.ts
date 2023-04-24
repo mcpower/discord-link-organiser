@@ -28,6 +28,7 @@ const command = new SlashCommandBuilder()
               .setRequired(true)
           )
       )
-  );
+  )
+  .toJSON();
 
 void putGuildCommands([command]);

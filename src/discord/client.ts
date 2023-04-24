@@ -1,12 +1,15 @@
 import {
+  APIEmbed,
+  ChannelType,
+  ChatInputCommandInteraction,
   Client,
-  CommandInteraction,
   DiscordAPIError,
-  Intents,
+  GatewayIntentBits,
   Message,
-  MessageEmbedOptions,
+  MessageType,
   PartialMessage,
-  Permissions,
+  Partials,
+  PermissionFlagsBits,
   Snowflake,
 } from "discord.js";
 import * as config from "../config";
@@ -34,15 +37,20 @@ export class GirlsClient {
 
   constructor() {
     this.client = new Client({
-      intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+      intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+      ],
       // why isn't this the default. enable ALL partials
       partials: [
-        "USER",
-        "MESSAGE",
-        "CHANNEL",
-        "REACTION",
-        "GUILD_MEMBER",
-        "GUILD_SCHEDULED_EVENT",
+        Partials.User,
+        Partials.Channel,
+        Partials.GuildMember,
+        Partials.Message,
+        Partials.Reaction,
+        Partials.GuildScheduledEvent,
+        Partials.ThreadMember,
       ],
     });
     this.channelLock = new LockQueue();
@@ -59,7 +67,7 @@ export class GirlsClient {
       this.channelLock.enqueue(() => this.messageCreate(message));
     });
     this.client.on("interactionCreate", (interaction) => {
-      if (!interaction.isCommand()) {
+      if (!interaction.isChatInputCommand()) {
         return;
       }
       if (interaction.guildId !== config.guildId) {
@@ -123,7 +131,7 @@ export class GirlsClient {
     }
   }
 
-  async configSixMonth(interaction: CommandInteraction) {
+  async configSixMonth(interaction: ChatInputCommandInteraction) {
     const em = await getEm();
     let dbUser = await em.findOne(DbUser, interaction.user.id);
     if (dbUser === null) {
@@ -145,8 +153,8 @@ export class GirlsClient {
     return (
       message.channelId !== config.channelId ||
       (message.type !== null &&
-        message.type !== "DEFAULT" &&
-        message.type !== "REPLY") ||
+        message.type !== MessageType.Default &&
+        message.type !== MessageType.Reply) ||
       (message.author !== null &&
         thisUser !== undefined &&
         message.author.id === thisUser)
@@ -158,7 +166,10 @@ export class GirlsClient {
     console.log(`ready: logged in as ${client.user.tag}`);
     const channel = await client.channels.fetch(config.channelId);
     assert(channel, "The config's channel does not exist.");
-    assert(channel.isText(), "The config's channel is not a text channel.");
+    assert(
+      channel.type === ChannelType.GuildText,
+      "The config's channel is not a text channel."
+    );
     const lastMessage = await DbMessage.getLastMessage(config.channelId, em);
     console.log(`ready: getting all messages from ${lastMessage}`);
     const messageIds: Snowflake[] = [];
@@ -336,7 +347,7 @@ export class GirlsClient {
           message.inGuild() &&
           // We could use permissionsIn, but that's probably overkill
           // (and adds some API overhead).
-          member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)
+          member.permissions.has(PermissionFlagsBits.ManageMessages)
         )
       ) {
         shouldDelete = true;
@@ -501,7 +512,7 @@ export class GirlsClient {
           `Please delete [your message](${dbMessage.url}) if I didn't make a mistake!`
         );
       }
-      const embeds: MessageEmbedOptions[] = [
+      const embeds: APIEmbed[] = [
         {
           description: notices.join("\n"),
         },
