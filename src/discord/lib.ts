@@ -81,7 +81,7 @@ export async function putGuildCommands(
   commands: RESTPostAPIApplicationCommandsJSONBody[]
 ) {
   // TODO: update REST version
-  const rest = new REST({ version: "9" }).setToken(config.token);
+  const rest = new REST().setToken(config.token);
   const route = Routes.applicationGuildCommands(
     config.applicationId,
     config.guildId
