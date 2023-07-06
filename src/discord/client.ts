@@ -173,6 +173,7 @@ export class GirlsClient {
     const lastMessage = await DbMessage.getLastMessage(config.channelId, em);
     console.log(`ready: getting all messages from ${lastMessage}`);
     const messageIds: Snowflake[] = [];
+    let count = 0;
     for await (const message of getAllMessages(channel.messages, lastMessage)) {
       if (this.shouldIgnore(message)) {
         continue;
@@ -180,6 +181,10 @@ export class GirlsClient {
       const dbMessage = toDbMessageAndPopulate(message, client.readyTimestamp);
       em.persist(dbMessage);
       messageIds.push(message.id);
+      count++;
+      if (count % 1000 == 0) {
+        console.log(`ready: ${count} processed`);
+      }
     }
     // Delete messages if they're already in the database. The above fetch
     // should all be new - and if they're not, these are more recently fetched
