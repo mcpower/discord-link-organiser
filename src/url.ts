@@ -1,6 +1,6 @@
 import assert from "assert";
 
-export const URL_REGEX = /https?:\/\/[^\s<]+[^<.,:;"')\]\s]/g;
+export const URL_REGEX = /https?:\/\/[^\s<]+[^<.,:;"')\]\s>|]/g;
 
 interface MessageContents {
   comment: string;

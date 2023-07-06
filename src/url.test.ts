@@ -50,6 +50,36 @@ describe("urlsAndCommentFromMessage", () => {
     expect(comment).toBe("search engines");
   });
 
+  test("works with 'autolinks' (no embed)", () => {
+    const { links } = parseMessage(
+      "(<https://twitter.com/uruha824/status/1594180374925492224>)"
+    );
+    expect(links).toHaveLength(1);
+    expect(links[0]?.url.toString()).toBe(
+      "https://twitter.com/uruha824/status/1594180374925492224"
+    );
+  });
+
+  test("works with spoilers", () => {
+    const { links } = parseMessage(
+      "||https://twitter.com/uruha824/status/1594180374925492224||"
+    );
+    expect(links).toHaveLength(1);
+    expect(links[0]?.url.toString()).toBe(
+      "https://twitter.com/uruha824/status/1594180374925492224"
+    );
+  });
+
+  test.failing("works with general markdown syntax", () => {
+    const { links } = parseMessage(
+      "**https://twitter.com/uruha824/status/1594180374925492224**"
+    );
+    expect(links).toHaveLength(1);
+    expect(links[0]?.url.toString()).toBe(
+      "https://twitter.com/uruha824/status/1594180374925492224"
+    );
+  });
+
   test("works with leading/trailing whitespace", () => {
     const { comment, links } = parseMessage(
       "  (via Lily) https://twitter.com/sabasabaflash/status/1487712193449639942  "
