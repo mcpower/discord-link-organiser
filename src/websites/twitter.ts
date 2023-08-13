@@ -10,6 +10,8 @@ const HOSTS = [
   "www.fxtwitter.com",
   "twittpr.com",
   "www.twittpr.com",
+  "x.com",
+  "www.x.com",
 ];
 const PATH_REGEXES = [
   /^\/[^/]*\/status\/(\d+)(?:\/photo\/\d+)?\/?$/,
