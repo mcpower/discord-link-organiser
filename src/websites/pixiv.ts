@@ -1,6 +1,6 @@
 import { compareBigints, MAX_SQL_INT } from "../utils/bigints";
 
-const HOSTS = ["pixiv.net", "www.pixiv.net"];
+const HOSTS = ["pixiv.net", "www.pixiv.net", "phixiv.net", "www.phixiv.net"];
 const PATH_REGEX = /^\/(?:en\/)?artworks\/(\d+)\/?/;
 const OLD_PIXIV_PATH = "/member_illust.php";
 const OLD_PIXIV_PARAM = "illust_id";

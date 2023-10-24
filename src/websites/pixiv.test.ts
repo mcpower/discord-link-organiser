@@ -12,6 +12,16 @@ describe("parsePixivUrl", () => {
     expect(parsePixivUrl(new URL(girl))).toBe("66458540");
   });
 
+  test("works with a random phixiv link", () => {
+    const girl = "https://www.phixiv.net/en/artworks/66458540";
+    expect(parsePixivUrl(new URL(girl))).toBe("66458540");
+  });
+
+  test("works with a non-English phixiv link", () => {
+    const girl = "https://www.phixiv.net/artworks/66458540";
+    expect(parsePixivUrl(new URL(girl))).toBe("66458540");
+  });
+
   test("works with the old URL format", () => {
     const girl =
       "http://www.pixiv.net/member_illust.php?mode=medium&illust_id=66458540";
