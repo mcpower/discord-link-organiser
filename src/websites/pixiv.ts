@@ -13,7 +13,9 @@ const OLD_PIXIV_PATH = "/member_illust.php";
 const OLD_PIXIV_PARAM = "illust_id";
 const POSITIVE_NUMBER_REGEX = /^\d+$/;
 
-export function parsePixivUrl(url: URL): string | undefined {
+export function parsePixivUrl(
+  url: URL
+): { id: string; index: number } | undefined {
   if (!HOSTS.includes(url.hostname)) {
     return undefined;
   }
@@ -39,5 +41,5 @@ export function parsePixivUrl(url: URL): string | undefined {
   if (compareBigints(id, MAX_SQL_INT) > 0) {
     throw new Error(`pixiv id ${id} can't fit in a database`);
   }
-  return id;
+  return { id, index: 0 };
 }

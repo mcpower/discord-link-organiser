@@ -42,11 +42,11 @@ export class PixivLink {
   }
 
   static fromUrl(message: Message, url: URL): PixivLink | undefined {
-    const pixivId = parsePixivUrl(url);
-    if (pixivId === undefined) {
+    const parsed = parsePixivUrl(url);
+    if (parsed === undefined) {
       return undefined;
     }
-    return new PixivLink(message, pixivId);
+    return new PixivLink(message, parsed.id);
   }
 
   get url(): string {

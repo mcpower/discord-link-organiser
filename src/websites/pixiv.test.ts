@@ -4,38 +4,59 @@ import { parsePixivUrl } from "./pixiv";
 describe("parsePixivUrl", () => {
   test("works with a random pixiv link", () => {
     const girl = "https://www.pixiv.net/en/artworks/66458540";
-    expect(parsePixivUrl(new URL(girl))).toBe("66458540");
+    expect(parsePixivUrl(new URL(girl))).toStrictEqual({
+      id: "66458540",
+      index: 0,
+    });
   });
 
   test("works with a non-English link", () => {
     const girl = "https://www.pixiv.net/artworks/66458540";
-    expect(parsePixivUrl(new URL(girl))).toBe("66458540");
+    expect(parsePixivUrl(new URL(girl))).toStrictEqual({
+      id: "66458540",
+      index: 0,
+    });
   });
 
   test("works with a random phixiv link", () => {
     const girl = "https://www.phixiv.net/en/artworks/66458540";
-    expect(parsePixivUrl(new URL(girl))).toBe("66458540");
+    expect(parsePixivUrl(new URL(girl))).toStrictEqual({
+      id: "66458540",
+      index: 0,
+    });
   });
 
   test("works with a non-English phixiv link", () => {
     const girl = "https://www.phixiv.net/artworks/66458540";
-    expect(parsePixivUrl(new URL(girl))).toBe("66458540");
+    expect(parsePixivUrl(new URL(girl))).toStrictEqual({
+      id: "66458540",
+      index: 0,
+    });
   });
 
   test("works with a random ppxiv link", () => {
     const girl = "https://www.ppxiv.net/en/artworks/66458540";
-    expect(parsePixivUrl(new URL(girl))).toBe("66458540");
+    expect(parsePixivUrl(new URL(girl))).toStrictEqual({
+      id: "66458540",
+      index: 0,
+    });
   });
 
   test("works with a non-English ppxiv link", () => {
     const girl = "https://www.ppxiv.net/artworks/66458540";
-    expect(parsePixivUrl(new URL(girl))).toBe("66458540");
+    expect(parsePixivUrl(new URL(girl))).toStrictEqual({
+      id: "66458540",
+      index: 0,
+    });
   });
 
   test("works with the old URL format", () => {
     const girl =
       "http://www.pixiv.net/member_illust.php?mode=medium&illust_id=66458540";
-    expect(parsePixivUrl(new URL(girl))).toBe("66458540");
+    expect(parsePixivUrl(new URL(girl))).toStrictEqual({
+      id: "66458540",
+      index: 0,
+    });
   });
 
   test("throws when id is too big", () => {
