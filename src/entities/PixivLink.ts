@@ -26,6 +26,9 @@ export class PixivLink {
   @Property()
   pixivId: string;
 
+  @Property({ default: 0 })
+  pixivIndex = 0;
+
   // Denormalised. Should be equivalent to message.channel.
   @Property()
   channel: string;
@@ -34,9 +37,10 @@ export class PixivLink {
   @Property()
   created: number;
 
-  constructor(message: Message, pixivId: string) {
+  constructor(message: Message, pixivId: string, pixivIndex: number) {
     this.message = Reference.create(message);
     this.pixivId = pixivId;
+    this.pixivIndex = pixivIndex;
     this.channel = message.channel;
     this.created = message.updated;
   }
@@ -46,7 +50,7 @@ export class PixivLink {
     if (parsed === undefined) {
       return undefined;
     }
-    return new PixivLink(message, parsed.id);
+    return new PixivLink(message, parsed.id, parsed.index);
   }
 
   get url(): string {

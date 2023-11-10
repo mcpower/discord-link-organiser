@@ -135,6 +135,16 @@
           "nullable": false,
           "mappedType": "text"
         },
+        "pixiv_index": {
+          "name": "pixiv_index",
+          "type": "integer",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "0",
+          "mappedType": "integer"
+        },
         "channel": {
           "name": "channel",
           "type": "text",
