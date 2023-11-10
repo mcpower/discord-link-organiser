@@ -50,6 +50,20 @@ describe("parsePixivUrl", () => {
     });
   });
 
+  test("gives correct index with phixiv links", () => {
+    const girl = "https://www.phixiv.net/en/artworks/85499495/11";
+    expect(parsePixivUrl(new URL(girl))).toStrictEqual({
+      id: "85499495",
+      index: 10,
+    });
+  });
+
+  test("throws when index is absurdly big", () => {
+    const girl =
+      "https://www.phixiv.net/en/artworks/85499495/10000000000000000";
+    expect(() => parsePixivUrl(new URL(girl))).toThrow();
+  });
+
   test("works with the old URL format", () => {
     const girl =
       "http://www.pixiv.net/member_illust.php?mode=medium&illust_id=66458540";
