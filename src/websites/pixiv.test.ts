@@ -58,10 +58,10 @@ describe("parsePixivUrl", () => {
     });
   });
 
-  test("throws when index is absurdly big", () => {
+  test("rejects when index is absurdly big", () => {
     const girl =
       "https://www.phixiv.net/en/artworks/85499495/10000000000000000";
-    expect(() => parsePixivUrl(new URL(girl))).toThrow();
+    expect(parsePixivUrl(new URL(girl))).toBeUndefined();
   });
 
   test("works with the old URL format", () => {
@@ -73,13 +73,13 @@ describe("parsePixivUrl", () => {
     });
   });
 
-  test("throws when id is too big", () => {
+  test("rejects when id is too big", () => {
     const girl = "https://www.pixiv.net/en/artworks/6645854000000000000000";
-    expect(() => parsePixivUrl(new URL(girl))).toThrow();
+    expect(parsePixivUrl(new URL(girl))).toBeUndefined();
 
     const otherFormatGirl =
       "http://www.pixiv.net/member_illust.php?mode=medium&illust_id=6645854000000000000000";
-    expect(() => parsePixivUrl(new URL(otherFormatGirl))).toThrow();
+    expect(parsePixivUrl(new URL(otherFormatGirl))).toBeUndefined();
   });
 
   test("rejects other URLs", () => {

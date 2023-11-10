@@ -37,14 +37,14 @@ describe("parseTwitterUrl", () => {
     expect(parseTwitterUrl(new URL(photo))).toBe("1480872116660494338");
   });
 
-  test("throws when id is too big", () => {
+  test("rejects when id is too big", () => {
     const girl =
       "https://twitter.com/WD0706/status/14808721166604943380000000000";
-    expect(() => parseTwitterUrl(new URL(girl))).toThrow();
+    expect(parseTwitterUrl(new URL(girl))).toBeUndefined();
 
     const otherFormatGirl =
       "https://twitter.com/i/web/status/14808721166604943380000000000";
-    expect(() => parseTwitterUrl(new URL(otherFormatGirl))).toThrow();
+    expect(parseTwitterUrl(new URL(otherFormatGirl))).toBeUndefined();
   });
 
   test("rejects other URLs", () => {

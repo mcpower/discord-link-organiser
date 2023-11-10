@@ -34,8 +34,7 @@ export function parsePixivUrl(
       if (indexInUrl < Number.MAX_SAFE_INTEGER) {
         index = indexInUrl - 1;
       } else {
-        // TODO: this probably shouldn't throw?
-        throw new Error(`pixiv index ${indexMatch} can't be decremented`);
+        return undefined;
       }
     }
   }
@@ -52,8 +51,7 @@ export function parsePixivUrl(
   }
 
   if (compareBigints(id, MAX_SQL_INT) > 0) {
-    // TODO: this probably shouldn't throw?
-    throw new Error(`pixiv id ${id} can't fit in a database`);
+    return undefined;
   }
   return { id, index };
 }

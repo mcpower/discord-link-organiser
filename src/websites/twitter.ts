@@ -27,7 +27,7 @@ export function parseTwitterUrl(url: URL): string | undefined {
     if (match !== null) {
       const id = match[1];
       if (id && compareBigints(id, MAX_SQL_INT) > 0) {
-        throw new Error(`twitter id ${id} can't fit in a database`);
+        return undefined;
       }
       return id;
     }
