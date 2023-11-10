@@ -474,7 +474,11 @@ export class GirlsClient {
             await this.client.users.fetch(linkMessage.author)
           ).toString();
         }
-        return `${author} sent ${link.url} <t:${createdSecs}:R> ([message](${linkMessage.url})).`;
+        // Intentionally add a space before the final full stop to prevent
+        // Discord from mistakenly creating an embed for it.
+        // We can't use <> here as that would prevent Discord's nice formatting
+        // of message links.
+        return `${author} sent <${link.url}> <t:${createdSecs}:R> (${linkMessage.url}) .`;
       })
     );
     if (repostNotices.length > 0) {
@@ -514,22 +518,17 @@ export class GirlsClient {
       }
       if (deleteFailed) {
         notices.push(
-          `Please delete [your message](${dbMessage.url}) if I didn't make a mistake!`
+          `Please delete your message (${dbMessage.url}) if I didn't make a mistake!`
         );
       }
-      const embeds: APIEmbed[] = [
-        {
-          description: notices.join("\n"),
-        },
-      ];
+      const content = notices.join("\n");
       try {
         await author.send({
-          embeds,
+          content,
         });
       } catch (err) {
         const repostMessage = await message.channel.send({
-          content: `${author}, I couldn't DM you!`,
-          embeds,
+          content: `${author}, I couldn't DM you!\n\n${content}`,
           allowedMentions: { users: [author.id] },
         });
         await delay(10000);
