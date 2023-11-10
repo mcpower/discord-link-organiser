@@ -14,6 +14,8 @@ import { parsePixivUrl } from "../websites/pixiv";
 
 @Entity()
 // Used for "get all posts in channel which sent a link before a given time"
+// pixivIndex isn't in the index because Historical Reasons and the fact that
+// most pixiv IDs won't have many indices
 @Index({ properties: ["pixivId", "channel", "created"] })
 export class PixivLink {
   // when it's necessary, add a generic "HasId" on the class
@@ -63,6 +65,7 @@ export class PixivLink {
       .select("*")
       .where({
         pixivId: this.pixivId,
+        pixivIndex: this.pixivIndex,
         channel: this.channel,
         // probably not needed
         message: { $ne: this.message.id },
