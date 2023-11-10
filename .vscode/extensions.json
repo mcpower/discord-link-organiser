@@ -3,6 +3,7 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "editorconfig.editorconfig",
-    "Orta.vscode-jest"
+    "ryanluker.vscode-coverage-gutters",
+    "zixuanchen.vitest-explorer"
   ]
 }

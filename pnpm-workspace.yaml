@@ -1,0 +1,6 @@
+allowBuilds:
+  better-sqlite3: true
+  bufferutil: true
+  erlpack: true
+  utf-8-validate: true
+  zlib-sync: true

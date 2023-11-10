@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { delay } from "./delay";
 import { LockQueue } from "./LockQueue";
 

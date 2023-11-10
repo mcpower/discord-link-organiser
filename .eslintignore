@@ -3,3 +3,4 @@ build/
 temp/
 coverage/
 *.js
+vitest.config.ts
