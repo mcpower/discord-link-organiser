@@ -56,7 +56,13 @@ export class PixivLink {
   }
 
   get url(): string {
-    return `https://www.pixiv.net/en/artworks/${this.pixivId}`;
+    if (this.pixivIndex !== 0) {
+      return `https://www.phixiv.net/en/artworks/${this.pixivId}/${
+        this.pixivIndex + 1
+      }`;
+    } else {
+      return `https://www.pixiv.net/en/artworks/${this.pixivId}`;
+    }
   }
 
   async lastLink(em: EM): Promise<PixivLink | undefined> {
