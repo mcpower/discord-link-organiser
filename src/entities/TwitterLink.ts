@@ -1,6 +1,6 @@
 import {
   Entity,
-  IdentifiedReference,
+  Ref,
   Index,
   ManyToOne,
   PrimaryKey,
@@ -21,7 +21,7 @@ export class TwitterLink {
   id?: number;
 
   @ManyToOne({ onDelete: "cascade" })
-  message: IdentifiedReference<Message>;
+  message: Ref<Message>;
 
   @Property()
   twitterId: string;

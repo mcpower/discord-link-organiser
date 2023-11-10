@@ -1,6 +1,6 @@
 import {
   Entity,
-  IdentifiedReference,
+  Ref,
   Index,
   ManyToOne,
   PrimaryKey,
@@ -23,7 +23,7 @@ export class PixivLink {
   id?: number;
 
   @ManyToOne({ onDelete: "cascade" })
-  message: IdentifiedReference<Message>;
+  message: Ref<Message>;
 
   @Property()
   pixivId: string;
