@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { parseMessage } from "./url";
 
 describe("urlsAndCommentFromMessage", () => {
@@ -70,7 +70,7 @@ describe("urlsAndCommentFromMessage", () => {
     );
   });
 
-  test.failing("works with general markdown syntax", () => {
+  test.skip("works with general markdown syntax", () => {
     const { links } = parseMessage(
       "**https://twitter.com/uruha824/status/1594180374925492224**"
     );

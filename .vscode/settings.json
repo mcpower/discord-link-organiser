@@ -1,4 +1,7 @@
 {
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "coverage-gutters.coverageFileNames": ["coverage/lcov.info"],
+  "vitest.enable": true,
+  "testing.automaticallyOpenPeekView": "never"
 }

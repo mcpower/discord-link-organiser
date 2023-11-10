@@ -9,24 +9,22 @@
     "debug": "node -r ts-node/register --inspect index.ts",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx; prettier --check .",
     "format": "prettier --write .",
-    "test": "jest"
+    "test": "vitest"
   },
   "author": "mcpower",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.22.7",
-    "@babel/preset-env": "^7.22.7",
-    "@babel/preset-typescript": "^7.22.5",
     "@mikro-orm/cli": "^5.7.12",
     "@types/node": "^18.16.0",
     "@typescript-eslint/eslint-plugin": "^5.61.0",
     "@typescript-eslint/parser": "^5.61.0",
+    "@vitest/coverage-v8": "^0.34.6",
     "babel-jest": "^29.6.0",
     "eslint": "^8.44.0",
     "eslint-config-prettier": "^8.8.0",
-    "jest": "^29.6.0",
     "prettier": "^2.8.8",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "vitest": "^0.34.6"
   },
   "dependencies": {
     "@mikro-orm/better-sqlite": "^5.7.12",

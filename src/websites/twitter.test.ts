@@ -1,5 +1,5 @@
 import { parseTwitterUrl } from "./twitter";
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 
 describe("parseTwitterUrl", () => {
   test("works with a random tweet from minalinsky", () => {
