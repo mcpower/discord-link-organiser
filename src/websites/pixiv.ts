@@ -1,13 +1,6 @@
 import { compareBigints, MAX_SQL_INT } from "../utils/bigints";
 
-const HOSTS = [
-  "pixiv.net",
-  "www.pixiv.net",
-  "phixiv.net",
-  "www.phixiv.net",
-  "ppxiv.net",
-  "www.ppxiv.net",
-];
+const HOSTS = ["pixiv.net", "phixiv.net", "ppxiv.net"];
 const PATH_REGEX = /^\/(?:en\/)?artworks\/(\d+)(?:\/(\d+))?\/?/;
 const OLD_PIXIV_PATH = "/member_illust.php";
 const OLD_PIXIV_PARAM = "illust_id";
@@ -16,7 +9,11 @@ const POSITIVE_NUMBER_REGEX = /^\d+$/;
 export function parsePixivUrl(
   url: URL
 ): { id: string; index: number } | undefined {
-  if (!HOSTS.includes(url.hostname)) {
+  if (
+    !HOSTS.some(
+      (host) => url.hostname == host || url.hostname.endsWith("." + host)
+    )
+  ) {
     return undefined;
   }
 

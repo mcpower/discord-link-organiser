@@ -2,16 +2,10 @@ import { compareBigints, MAX_SQL_INT } from "../utils/bigints";
 
 const HOSTS = [
   "twitter.com",
-  "www.twitter.com",
-  "mobile.twitter.com",
   "vxtwitter.com",
-  "www.vxtwitter.com",
   "fxtwitter.com",
-  "www.fxtwitter.com",
   "twittpr.com",
-  "www.twittpr.com",
   "x.com",
-  "www.x.com",
 ];
 const PATH_REGEXES = [
   /^\/[^/]*\/status\/(\d+)(?:\/photo\/\d+)?\/?$/,
@@ -19,7 +13,11 @@ const PATH_REGEXES = [
 ];
 
 export function parseTwitterUrl(url: URL): string | undefined {
-  if (!HOSTS.includes(url.hostname)) {
+  if (
+    !HOSTS.some(
+      (host) => url.hostname == host || url.hostname.endsWith("." + host)
+    )
+  ) {
     return undefined;
   }
   for (const pathRegex of PATH_REGEXES) {
