@@ -4,15 +4,26 @@ aka "girls-ts"
 
 ## Notes
 
-Most of these things haven't even been implemented yet...
+- Currently only supports a single channel.
 
 - All removals should happen within a second or two of the message being posted.
   This is to prevent unexpected removals.
 
-- Messages without any attachments or links will be removed.
+- Gracefully falls back if the bot can't:
+
+  - DM the user - the bot sends a message in the channel mentioning the user,
+    then deletes it a few moments later.
+
+  - delete messages in the channel - the bot asks the user to delete it for
+    them.
+
+- Messages without any attachments or links will be removed... unless the user
+  has manage messages permission for the channel (i.e. moderators).
 
 - A message is removed if there is a message which was posted or edited less
   than 6 months ago which contains any Twitter or Pixiv link.
+
+  - You can extend this to be "any time" by using a slash command.
 
 - Deleted links, and links that were in a previous version of the message but
   later edited out, can be posted again.
@@ -28,16 +39,21 @@ Most of these things haven't even been implemented yet...
     is to prevent unexpected removals.
 
   - Any messages which are deleted or edited can't be picked up by the bot. This
-    is a Discord API limitation and can technically be worked around... by
-    retrieving all messages in the channel, which isn't great. Therefore, if a
-    message is deleted while the bot is offline, the bot will still think that
-    links in the message were posted, and if a message was edited while the bot
-    is offline, the bot will still think that the message is the original
-    message (so it thinks that links in the old message were posted, and links
-    in the new message _aren't_ posted).
+    is a Discord API limitation which isn't easy to work around. As a result:
 
-    - TODO: fix this by retrieving the "original message" to see if it wasn't
-      deleted or edited since the bot last looked at it.
+    - Some reposts may slip through if a message is _edited_ with new links.
+
+    - No messages will be incorrectly deleted if the supposed "previous post"
+      was deleted since the bot last looked at it - as the both fetches the
+      "previous post" before deleting.
+
+- If your server can't compile TypeScript, here's my deploy script:
+
+  ```
+  npx tsc && scp -r build server:git/discord-link-organiser/ && \
+    ssh server "cp ~/git/discord-link-organiser/config.json \
+      ~/git/discord-link-organiser/build"
+  ```
 
 ## License
 
