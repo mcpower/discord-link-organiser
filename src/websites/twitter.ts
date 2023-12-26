@@ -1,11 +1,16 @@
 import { compareBigints, MAX_SQL_INT } from "../utils/bigints";
 
 const HOSTS = [
+  // Official
   "twitter.com",
-  "vxtwitter.com",
+  "x.com",
+  // FixTweet
   "fxtwitter.com",
   "twittpr.com",
-  "x.com",
+  "fixupx.com",
+  // BetterTwitFix
+  "vxtwitter.com",
+  "fixvx.com",
 ];
 const PATH_REGEXES = [
   /^\/[^/]*\/status\/(\d+)(?:\/photo\/\d+)?\/?$/,
