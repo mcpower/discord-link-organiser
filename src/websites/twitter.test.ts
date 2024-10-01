@@ -19,6 +19,7 @@ describe("parseTwitterUrl", () => {
     "twittpr.com",
     "fixvx.com",
     "fixupx.com",
+    "stupidpenisx.com",
   ])("works with domain %s", (domain) => {
     const girl = `https://${domain}/WD0706/status/1480872116660494338/`;
     expect(parseTwitterUrl(new URL(girl))).toBe("1480872116660494338");

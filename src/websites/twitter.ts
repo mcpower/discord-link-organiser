@@ -8,6 +8,7 @@ const HOSTS = [
   "fxtwitter.com",
   "twittpr.com",
   "fixupx.com",
+  "stupidpenisx.com", // thanks oxateu
   // BetterTwitFix
   "vxtwitter.com",
   "fixvx.com",
