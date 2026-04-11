@@ -1,6 +1,7 @@
 // Type checked config file with TypeScript.
 import * as config from "../config.json";
 
+// oxlint-disable-next-line eslint(no-constant-condition)
 if (false) {
   function isType<T>(_t: T) {}
   isType<{

@@ -1,5 +1,4 @@
 import {
-  APIEmbed,
   ChannelType,
   ChatInputCommandInteraction,
   Client,
@@ -341,7 +340,8 @@ export class GirlsClient {
           member = await (
             await this.client.guilds.fetch(config.guildId)
           ).members.fetch(dbMessage.author);
-        } catch (e) {
+        } catch {
+          // TODO: ensure that the exception raised matches the below idea.
           // This probably shouldn't happen - but gracefully fail anyway.
           console.log(`reposts: user ${dbMessage.author} missing from guild`);
         }
@@ -526,7 +526,7 @@ export class GirlsClient {
         await author.send({
           content,
         });
-      } catch (err) {
+      } catch {
         const repostMessage = await message.channel.send({
           content: `${author}, I couldn't DM you!\n\n${content}`,
           allowedMentions: { users: [author.id] },

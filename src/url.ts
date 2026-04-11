@@ -23,7 +23,7 @@ export function parseMessage(message: string): MessageContents {
     const urlText = match[0]!;
     try {
       urls.push(new URL(urlText));
-    } catch (e: unknown) {
+    } catch {
       // bad URL - continue onto next match
       continue;
     }
