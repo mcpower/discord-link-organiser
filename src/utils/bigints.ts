@@ -7,6 +7,8 @@ export function compareBigints(a: string, b: string) {
   if (a > b) {
     return 1;
   } else if (a < b) {
+    // These three cases are linked.
+    // oxlint-disable-next-line no-else-return
     return -1;
   } else {
     return 0;

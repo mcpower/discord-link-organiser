@@ -7,18 +7,18 @@ export class Queue<T> {
   }
 
   first(): T | undefined {
-    return this.currentQueue[this.currentQueue.length - 1] ?? this.toPush[0];
+    return this.currentQueue.at(-1) ?? this.toPush[0];
   }
 
   dequeue(): T | undefined {
     const popped = this.currentQueue.pop();
     if (popped !== undefined) {
       return popped;
-    } else {
-      this.toPush.reverse();
-      [this.toPush, this.currentQueue] = [this.currentQueue, this.toPush];
-      return this.currentQueue.pop();
     }
+
+    this.toPush.reverse();
+    [this.toPush, this.currentQueue] = [this.currentQueue, this.toPush];
+    return this.currentQueue.pop();
   }
 
   get length(): number {

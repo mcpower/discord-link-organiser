@@ -23,9 +23,11 @@ export class LockQueue {
   enqueue(f: AsyncFunction) {
     this.queue.enqueue(f);
     if (!this.state) {
-      let resolve: (() => void) | undefined = undefined;
-      const promise: Promise<void> = new Promise((r) => (resolve = r));
-      assert(resolve);
+      let resolve: (() => void) | undefined;
+      const promise: Promise<void> = new Promise((r) => {
+        resolve = r;
+      });
+      assert.ok(resolve);
       this.state = { promise, resolve };
       void this.run();
     }
@@ -42,13 +44,12 @@ export class LockQueue {
   private async run() {
     // Safety: This function is only called from enqueue, and enqueue guarantees
     // that this.state is defined.
-    assert(this.state);
+    assert.ok(this.state);
     let nextFunction: AsyncFunction | undefined;
     while ((nextFunction = this.queue.dequeue()) !== undefined) {
       await nextFunction();
     }
     this.state.resolve();
     this.state = undefined;
-    return;
   }
 }

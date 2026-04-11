@@ -164,8 +164,8 @@ export class GirlsClient {
     const em = await getEm();
     console.log(`ready: logged in as ${client.user.tag}`);
     const channel = await client.channels.fetch(config.channelId);
-    assert(channel, "The config's channel does not exist.");
-    assert(
+    assert.ok(channel, "The config's channel does not exist.");
+    assert.ok(
       channel.type === ChannelType.GuildText,
       "The config's channel is not a text channel."
     );
@@ -181,7 +181,7 @@ export class GirlsClient {
       em.persist(dbMessage);
       messageIds.push(message.id);
       count++;
-      if (count % 1000 == 0) {
+      if (count % 1000 === 0) {
         console.log(`ready: ${count} processed`);
       }
     }
@@ -246,7 +246,7 @@ export class GirlsClient {
     // get correctly cleared.
     await em.populate(dbMessage, true);
     dbMessage.content = message.content;
-    if (message.editedTimestamp) {
+    if (message.editedTimestamp !== null) {
       dbMessage.setEdited(message.editedTimestamp);
     }
     dbMessage.twitterLinks.removeAll();
@@ -370,6 +370,8 @@ export class GirlsClient {
       return;
     }
     let dbUser = await em.findOne(DbUser, dbMessage.author);
+    // Explicitly handle this case separately.
+    // oxlint-disable-next-line typescript/prefer-nullish-coalescing
     if (dbUser === null) {
       // Do not persist this new dbUser - we just use it for getting the default
       // values of options.
@@ -456,7 +458,6 @@ export class GirlsClient {
               err
             );
             failedIds.add(messageToFetch.id);
-            return;
           }
         })
       );

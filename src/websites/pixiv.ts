@@ -11,7 +11,7 @@ export function parsePixivUrl(
 ): { id: string; index: number } | undefined {
   if (
     !HOSTS.some(
-      (host) => url.hostname == host || url.hostname.endsWith("." + host)
+      (host) => url.hostname === host || url.hostname.endsWith("." + host)
     )
   ) {
     return undefined;
@@ -24,7 +24,7 @@ export function parsePixivUrl(
   if (match !== null) {
     id = match[1];
     const indexMatch = match[2];
-    if (indexMatch) {
+    if (indexMatch !== undefined) {
       // As the regex uses /\d+/, it is guaranteed that this is a positive
       // integer.
       const indexInUrl = Number(indexMatch);

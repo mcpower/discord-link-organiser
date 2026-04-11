@@ -27,16 +27,16 @@ export function parseMessage(message: string): MessageContents {
       // bad URL - continue onto next match
       continue;
     }
-    assert(match.index !== undefined);
+    assert.ok(match.index !== undefined);
     // the non-URL part of the message before this URL
-    const previousPart = message.substring(messageIndex, match.index).trim();
+    const previousPart = message.slice(messageIndex, match.index).trim();
     parts.push(previousPart);
     messageIndex = match.index + urlText.length;
   }
   // push the last part of the message on
-  parts.push(message.substring(messageIndex).trim());
+  parts.push(message.slice(messageIndex).trim());
   const [comment, ...extras] = parts;
-  assert(
+  assert.ok(
     extras.length === urls.length,
     `mismatched lengths for ${JSON.stringify(message)}`
   );

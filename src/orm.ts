@@ -9,7 +9,7 @@ export async function getEm() {
   return orm.em.fork();
 }
 
-export async function getOrm() {
+export function getOrm() {
   return ormPromise;
 }
 

@@ -27,13 +27,13 @@ export function toDbMessage(
   } = message;
   return new DbMessage({
     id,
-    guild: guildId === null ? undefined : guildId,
+    guild: guildId ?? undefined,
     channel: channelId,
     author: author.id,
     content,
     attachments: attachments.size,
     created: createdTimestamp,
-    edited: editedTimestamp === null ? undefined : editedTimestamp,
+    edited: editedTimestamp ?? undefined,
     lastReadyTimestamp,
   });
 }
