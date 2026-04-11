@@ -3,4 +3,4 @@ build/
 temp/
 coverage/
 config.json
-db.sqlite
+*.sqlite
