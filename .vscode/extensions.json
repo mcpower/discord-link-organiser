@@ -1,6 +1,5 @@
 {
   "recommendations": [
-    "esbenp.prettier-vscode",
     "editorconfig.editorconfig",
     "oxc.oxc-vscode",
     "ryanluker.vscode-coverage-gutters",

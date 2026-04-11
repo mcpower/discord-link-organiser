@@ -1,6 +1,0 @@
-build/
-node_modules/
-temp/
-coverage/
-package-lock.json
-package.json
