@@ -1,6 +1,0 @@
-node_modules/
-build/
-temp/
-coverage/
-*.js
-vitest.config.ts
