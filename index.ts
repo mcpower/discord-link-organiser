@@ -17,17 +17,17 @@ const command = new SlashCommandBuilder()
         subcommand
           .setName("six-month")
           .setDescription(
-            "configure whether girls will delete reposts of 6+ month old links"
+            "configure whether girls will delete reposts of 6+ month old links",
           )
           .addBooleanOption((option) =>
             option
               .setName("delete")
               .setDescription(
-                "whether girls will delete reposts of 6+ month old links"
+                "whether girls will delete reposts of 6+ month old links",
               )
-              .setRequired(true)
-          )
-      )
+              .setRequired(true),
+          ),
+      ),
   )
   .toJSON();
 

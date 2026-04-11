@@ -12,11 +12,11 @@ describe("urlsAndCommentFromMessage", () => {
 
   test("gets the message from one of my posts", () => {
     const { comment, links } = parseMessage(
-      "(via Lily) https://twitter.com/sabasabaflash/status/1487712193449639942"
+      "(via Lily) https://twitter.com/sabasabaflash/status/1487712193449639942",
     );
     expect(links).toHaveLength(1);
     expect(links[0]?.url.toString()).toBe(
-      "https://twitter.com/sabasabaflash/status/1487712193449639942"
+      "https://twitter.com/sabasabaflash/status/1487712193449639942",
     );
     expect(links[0]?.extra).toBe("");
     expect(comment).toBe("(via Lily)");
@@ -24,7 +24,7 @@ describe("urlsAndCommentFromMessage", () => {
 
   test("works with multiple URLs", () => {
     const { comment, links } = parseMessage(
-      "https://google.com https://yahoo.com https://bing.com"
+      "https://google.com https://yahoo.com https://bing.com",
     );
     expect(links).toHaveLength(3);
     expect(links[0]?.url.toString()).toBe("https://google.com/");
@@ -38,7 +38,7 @@ describe("urlsAndCommentFromMessage", () => {
 
   test("works with multiple URLs with extras and comments", () => {
     const { comment, links } = parseMessage(
-      "search engines https://google.com 1 https://yahoo.com 2 https://bing.com 3"
+      "search engines https://google.com 1 https://yahoo.com 2 https://bing.com 3",
     );
     expect(links).toHaveLength(3);
     expect(links[0]?.url.toString()).toBe("https://google.com/");
@@ -52,41 +52,41 @@ describe("urlsAndCommentFromMessage", () => {
 
   test("works with 'autolinks' (no embed)", () => {
     const { links } = parseMessage(
-      "(<https://twitter.com/uruha824/status/1594180374925492224>)"
+      "(<https://twitter.com/uruha824/status/1594180374925492224>)",
     );
     expect(links).toHaveLength(1);
     expect(links[0]?.url.toString()).toBe(
-      "https://twitter.com/uruha824/status/1594180374925492224"
+      "https://twitter.com/uruha824/status/1594180374925492224",
     );
   });
 
   test("works with spoilers", () => {
     const { links } = parseMessage(
-      "||https://twitter.com/uruha824/status/1594180374925492224||"
+      "||https://twitter.com/uruha824/status/1594180374925492224||",
     );
     expect(links).toHaveLength(1);
     expect(links[0]?.url.toString()).toBe(
-      "https://twitter.com/uruha824/status/1594180374925492224"
+      "https://twitter.com/uruha824/status/1594180374925492224",
     );
   });
 
   test.skip("works with general markdown syntax", () => {
     const { links } = parseMessage(
-      "**https://twitter.com/uruha824/status/1594180374925492224**"
+      "**https://twitter.com/uruha824/status/1594180374925492224**",
     );
     expect(links).toHaveLength(1);
     expect(links[0]?.url.toString()).toBe(
-      "https://twitter.com/uruha824/status/1594180374925492224"
+      "https://twitter.com/uruha824/status/1594180374925492224",
     );
   });
 
   test("works with leading/trailing whitespace", () => {
     const { comment, links } = parseMessage(
-      "  (via Lily) https://twitter.com/sabasabaflash/status/1487712193449639942  "
+      "  (via Lily) https://twitter.com/sabasabaflash/status/1487712193449639942  ",
     );
     expect(links).toHaveLength(1);
     expect(links[0]?.url.toString()).toBe(
-      "https://twitter.com/sabasabaflash/status/1487712193449639942"
+      "https://twitter.com/sabasabaflash/status/1487712193449639942",
     );
     expect(links[0]?.extra).toBe("");
     expect(comment).toBe("(via Lily)");

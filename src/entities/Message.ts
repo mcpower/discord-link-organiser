@@ -154,12 +154,12 @@ export class Message {
       [this.twitterLinks, this.pixivLinks].map(async (collection) => {
         const links = await collection.loadItems();
         return Promise.all(links.map((link) => link.lastLink(em)));
-      })
+      }),
     );
     return nestedLinks
       .flat()
       .filter(
-        (link): link is Exclude<typeof link, undefined> => link !== undefined
+        (link): link is Exclude<typeof link, undefined> => link !== undefined,
       );
   }
 

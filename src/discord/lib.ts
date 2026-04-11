@@ -13,7 +13,7 @@ const MAX_MESSAGES_PER_FETCH = 100;
 
 export function toDbMessage(
   message: Message,
-  lastReadyTimestamp?: number
+  lastReadyTimestamp?: number,
 ): DbMessage {
   const {
     id,
@@ -40,7 +40,7 @@ export function toDbMessage(
 
 export function toDbMessageAndPopulate(
   message: Message,
-  lastReadyTimestamp?: number
+  lastReadyTimestamp?: number,
 ): DbMessage {
   const dbMessage = toDbMessage(message, lastReadyTimestamp);
   dbMessage.populateLinks();
@@ -54,7 +54,7 @@ export function toDbMessageAndPopulate(
  */
 export async function* getAllMessages(
   messageManager: MessageManager,
-  after = "0"
+  after = "0",
 ) {
   while (true) {
     const messages = await messageManager.fetch({
@@ -78,13 +78,13 @@ export async function* getAllMessages(
 }
 
 export async function putGuildCommands(
-  commands: RESTPostAPIApplicationCommandsJSONBody[]
+  commands: RESTPostAPIApplicationCommandsJSONBody[],
 ) {
   // TODO: update REST version
   const rest = new REST().setToken(config.token);
   const route = Routes.applicationGuildCommands(
     config.applicationId,
-    config.guildId
+    config.guildId,
   );
 
   await rest.put(route, { body: commands });

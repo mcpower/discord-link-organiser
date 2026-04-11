@@ -13,8 +13,8 @@ describe("isHewo", () => {
     expect(isHewo("hewo")).toBeFalsy();
     expect(
       isHewo(
-        "https://twitter.com/WD0706/status/1480872116660494338?s=20&hewo=hewo"
-      )
+        "https://twitter.com/WD0706/status/1480872116660494338?s=20&hewo=hewo",
+      ),
     ).toBeFalsy();
   });
 });

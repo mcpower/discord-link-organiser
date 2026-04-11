@@ -38,7 +38,7 @@ export function parseMessage(message: string): MessageContents {
   const [comment, ...extras] = parts;
   assert.ok(
     extras.length === urls.length,
-    `mismatched lengths for ${JSON.stringify(message)}`
+    `mismatched lengths for ${JSON.stringify(message)}`,
   );
   const links = urls.map<MessageLink>((url, i) => ({
     url,

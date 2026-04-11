@@ -7,11 +7,11 @@ const OLD_PIXIV_PARAM = "illust_id";
 const POSITIVE_NUMBER_REGEX = /^\d+$/;
 
 export function parsePixivUrl(
-  url: URL
+  url: URL,
 ): { id: string; index: number } | undefined {
   if (
     !HOSTS.some(
-      (host) => url.hostname === host || url.hostname.endsWith("." + host)
+      (host) => url.hostname === host || url.hostname.endsWith("." + host),
     )
   ) {
     return undefined;

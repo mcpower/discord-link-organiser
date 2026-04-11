@@ -106,7 +106,7 @@ export class GirlsClient {
         return;
       }
       this.channelLock.enqueue(() =>
-        this.messageUpdate(oldMessage, newMessage)
+        this.messageUpdate(oldMessage, newMessage),
       );
     });
     this.client.on("messageDelete", (message) => {
@@ -167,7 +167,7 @@ export class GirlsClient {
     assert.ok(channel, "The config's channel does not exist.");
     assert.ok(
       channel.type === ChannelType.GuildText,
-      "The config's channel is not a text channel."
+      "The config's channel is not a text channel.",
     );
     const lastMessage = await DbMessage.getLastMessage(config.channelId, em);
     console.log(`ready: getting all messages from ${lastMessage}`);
@@ -203,7 +203,7 @@ export class GirlsClient {
     }
     const dbMessage = toDbMessageAndPopulate(
       message,
-      this.client.readyTimestamp ?? undefined
+      this.client.readyTimestamp ?? undefined,
     );
     await em.persistAndFlush(dbMessage);
     await this.handleViolations(em, message, dbMessage);
@@ -219,7 +219,7 @@ export class GirlsClient {
     em: EM,
     dbMessage: DbMessage,
     message: Message | PartialMessage,
-    readyTimestamp?: number
+    readyTimestamp?: number,
   ): Promise<boolean> {
     dbMessage.lastReadyTimestamp =
       readyTimestamp ?? this.client.readyTimestamp ?? undefined;
@@ -236,7 +236,7 @@ export class GirlsClient {
       message.editedTimestamp <= dbMessage.edited
     ) {
       console.log(
-        `update: message ${message.id} was older (${message.editedTimestamp}) than db (${dbMessage.edited})`
+        `update: message ${message.id} was older (${message.editedTimestamp}) than db (${dbMessage.edited})`,
       );
       return false;
     }
@@ -257,7 +257,7 @@ export class GirlsClient {
 
   async messageUpdate(
     _oldMessage: Message | PartialMessage,
-    newMessage: Message | PartialMessage
+    newMessage: Message | PartialMessage,
   ) {
     // It's possible we don't have the message type of this message, so we need
     // to check that down the line.
@@ -289,7 +289,7 @@ export class GirlsClient {
       }
       dbMessage = toDbMessageAndPopulate(
         newMessage,
-        this.client.readyTimestamp ?? undefined
+        this.client.readyTimestamp ?? undefined,
       );
       em.persist(dbMessage);
     } else {
@@ -307,7 +307,7 @@ export class GirlsClient {
   async handleViolations(
     em: EM,
     message: Message | PartialMessage,
-    dbMessage: DbMessage
+    dbMessage: DbMessage,
   ) {
     // The author is probably in the cache.
     const author = await this.client.users.fetch(dbMessage.author);
@@ -399,13 +399,13 @@ export class GirlsClient {
         ...new Map(
           reposts
             .map((link) => link.message.getEntity())
-            .map((repostMessage) => [repostMessage.id, repostMessage])
+            .map((repostMessage) => [repostMessage.id, repostMessage]),
         ).values(),
       ];
       const messagesToFetch = repostMessages.filter(
         (repostMessage) =>
           repostMessage.lastReadyTimestamp === undefined ||
-          repostMessage.lastReadyTimestamp !== readyTimestamp
+          repostMessage.lastReadyTimestamp !== readyTimestamp,
       );
 
       if (messagesToFetch.length === 0) {
@@ -417,8 +417,8 @@ export class GirlsClient {
       if (alreadyFetched.length > 0) {
         console.error(
           `reposts: attempting to fetch ${JSON.stringify(
-            alreadyFetched
-          )} which were previously fetched (this should never happen)`
+            alreadyFetched,
+          )} which were previously fetched (this should never happen)`,
         );
         return;
       }
@@ -427,7 +427,7 @@ export class GirlsClient {
           console.log(`reposts: fetching ${messageToFetch.id}`);
           try {
             const fetched = await message.channel.messages.fetch(
-              messageToFetch.id
+              messageToFetch.id,
             );
 
             // Pass in the readyTimestamp from before so we're guaranteed that
@@ -436,7 +436,7 @@ export class GirlsClient {
               em,
               messageToFetch,
               fetched,
-              readyTimestamp
+              readyTimestamp,
             );
             fetchedIds.add(messageToFetch.id);
           } catch (err: unknown) {
@@ -455,11 +455,11 @@ export class GirlsClient {
             }
             console.error(
               `reposts: error when fetching ${messageToFetch.id}. ignoring`,
-              err
+              err,
             );
             failedIds.add(messageToFetch.id);
           }
-        })
+        }),
       );
 
       await em.flush();
@@ -480,7 +480,7 @@ export class GirlsClient {
         // We can't use <> here as that would prevent Discord's nice formatting
         // of message links.
         return `${authorText} sent <${link.url}> <t:${createdSecs}:R> (${linkMessage.url}) .`;
-      })
+      }),
     );
     if (repostNotices.length > 0) {
       shouldDelete = true;
@@ -492,7 +492,7 @@ export class GirlsClient {
     }
 
     console.log(
-      `reposts: ${shouldDelete ? "deleting" : "handling"} ${message.id}`
+      `reposts: ${shouldDelete ? "deleting" : "handling"} ${message.id}`,
     );
     // Delete and send DM.
     // DON'T await Discord-related promises - these don't touch the database and
@@ -519,7 +519,7 @@ export class GirlsClient {
       }
       if (deleteFailed) {
         notices.push(
-          `Please delete your message (${dbMessage.url}) if I didn't make a mistake!`
+          `Please delete your message (${dbMessage.url}) if I didn't make a mistake!`,
         );
       }
       const content = notices.join("\n");

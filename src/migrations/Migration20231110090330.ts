@@ -4,7 +4,7 @@ import { Migration } from "@mikro-orm/migrations";
 export class Migration20231110090330 extends Migration {
   async up(): Promise<void> {
     this.addSql(
-      "alter table `pixiv_link` add column `pixiv_index` integer not null default 0;"
+      "alter table `pixiv_link` add column `pixiv_index` integer not null default 0;",
     );
   }
 

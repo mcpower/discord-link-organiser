@@ -21,7 +21,7 @@ const PATH_REGEXES = [
 export function parseTwitterUrl(url: URL): string | undefined {
   if (
     !HOSTS.some(
-      (host) => url.hostname === host || url.hostname.endsWith("." + host)
+      (host) => url.hostname === host || url.hostname.endsWith("." + host),
     )
   ) {
     return undefined;
