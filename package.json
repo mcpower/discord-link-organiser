@@ -2,25 +2,16 @@
   "name": "girls",
   "version": "0.0.1",
   "description": "discord link organiser",
+  "license": "MIT",
+  "author": "mcpower",
   "main": "build/index.js",
   "scripts": {
     "start": "ts-node index.ts",
     "startProd": "tsc && node ./build/index.js",
     "debug": "node -r ts-node/register --inspect index.ts",
     "lint": "oxlint",
+    "fmt": "oxfmt",
     "test": "vitest"
-  },
-  "author": "mcpower",
-  "license": "MIT",
-  "devDependencies": {
-    "@mikro-orm/cli": "^5.7.12",
-    "@types/node": "^18.16.0",
-    "@vitest/coverage-v8": "^0.34.6",
-    "oxlint": "^1.59.0",
-    "oxlint-tsgolint": "^0.20.0",
-    "typescript": "^5.1.6",
-    "vite": "^3.1.0",
-    "vitest": "^0.34.6"
   },
   "dependencies": {
     "@mikro-orm/better-sqlite": "^5.7.12",
@@ -34,6 +25,17 @@
     "tslib": "^2.6.0",
     "utf-8-validate": "^6.0.3",
     "zlib-sync": "^0.1.8"
+  },
+  "devDependencies": {
+    "@mikro-orm/cli": "^5.7.12",
+    "@types/node": "^18.16.0",
+    "@vitest/coverage-v8": "^0.34.6",
+    "oxfmt": "^0.44.0",
+    "oxlint": "^1.59.0",
+    "oxlint-tsgolint": "^0.20.0",
+    "typescript": "^5.1.6",
+    "vite": "^3.1.0",
+    "vitest": "^0.34.6"
   },
   "mikro-orm": {
     "useTsNode": true,

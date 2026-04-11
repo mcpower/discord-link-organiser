@@ -10,7 +10,6 @@ aka "girls-ts"
   This is to prevent unexpected removals.
 
 - Gracefully falls back if the bot can't:
-
   - DM the user - the bot sends a message in the channel mentioning the user,
     then deletes it a few moments later.
 
@@ -22,7 +21,6 @@ aka "girls-ts"
 
 - A message is removed if there is a message which was posted or edited less
   than 6 months ago which contains any Twitter or Pixiv link.
-
   - You can extend this to be "any time" by using a slash command.
 
 - Deleted links, and links that were in a previous version of the message but
@@ -33,14 +31,12 @@ aka "girls-ts"
   the edited message was originally sent.
 
 - While the bot is offline...
-
   - Reposts will not be removed. If a repost occurs while the bot is offline,
     the bot will completely ignore it the next time it comes back online. This
     is to prevent unexpected removals.
 
   - Any messages which are deleted or edited can't be picked up by the bot. This
     is a Discord API limitation which isn't easy to work around. As a result:
-
     - Some reposts may slip through if a message is _edited_ with new links.
 
     - No messages will be incorrectly deleted if the supposed "previous post"

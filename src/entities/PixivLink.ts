@@ -57,9 +57,7 @@ export class PixivLink {
 
   get url(): string {
     if (this.pixivIndex !== 0) {
-      return `https://www.phixiv.net/en/artworks/${this.pixivId}/${
-        this.pixivIndex + 1
-      }`;
+      return `https://www.phixiv.net/en/artworks/${this.pixivId}/${this.pixivIndex + 1}`;
     }
 
     return `https://www.pixiv.net/en/artworks/${this.pixivId}`;
