@@ -14,12 +14,14 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@discordjs/builders": "1.6.x",
     "@mikro-orm/better-sqlite": "^5.7.12",
     "@mikro-orm/core": "^5.7.12",
     "@mikro-orm/migrations": "^5.7.12",
     "@mikro-orm/reflection": "^5.7.12",
     "bufferutil": "^4.0.7",
-    "discord.js": "^14.11.0",
+    "discord-api-types": "0.37.53",
+    "discord.js": "14.11.x",
     "erlpack": "github:discord/erlpack",
     "ts-node": "^10.9.1",
     "tslib": "^2.6.0",
