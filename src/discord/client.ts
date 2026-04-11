@@ -393,17 +393,17 @@ export class GirlsClient {
           );
         });
       }
-      const messages = [
+      const repostMessages = [
         ...new Map(
           reposts
             .map((link) => link.message.getEntity())
-            .map((message) => [message.id, message])
+            .map((repostMessage) => [repostMessage.id, repostMessage])
         ).values(),
       ];
-      const messagesToFetch = messages.filter(
-        (message) =>
-          message.lastReadyTimestamp === undefined ||
-          message.lastReadyTimestamp !== readyTimestamp
+      const messagesToFetch = repostMessages.filter(
+        (repostMessage) =>
+          repostMessage.lastReadyTimestamp === undefined ||
+          repostMessage.lastReadyTimestamp !== readyTimestamp
       );
 
       if (messagesToFetch.length === 0) {
@@ -468,9 +468,9 @@ export class GirlsClient {
       reposts.map(async (link) => {
         const linkMessage = link.message.getEntity();
         const createdSecs = Math.round(link.created / 1000);
-        let author = "You";
+        let authorText = "You";
         if (linkMessage.author !== dbMessage.author) {
-          author = (
+          authorText = (
             await this.client.users.fetch(linkMessage.author)
           ).toString();
         }
@@ -478,7 +478,7 @@ export class GirlsClient {
         // Discord from mistakenly creating an embed for it.
         // We can't use <> here as that would prevent Discord's nice formatting
         // of message links.
-        return `${author} sent <${link.url}> <t:${createdSecs}:R> (${linkMessage.url}) .`;
+        return `${authorText} sent <${link.url}> <t:${createdSecs}:R> (${linkMessage.url}) .`;
       })
     );
     if (repostNotices.length > 0) {
