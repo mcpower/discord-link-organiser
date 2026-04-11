@@ -33,7 +33,7 @@ importers:
         specifier: 14.11.x
         version: 14.11.0(bufferutil@4.0.7)(utf-8-validate@6.0.3)
       erlpack:
-        specifier: github:discord/erlpack
+        specifier: github:discord/erlpack#2a4c0e832f3cd4e07c92d4baec326a631ed50f59
         version: https://codeload.github.com/discord/erlpack/tar.gz/2a4c0e832f3cd4e07c92d4baec326a631ed50f59
       ts-node:
         specifier: ^10.9.1

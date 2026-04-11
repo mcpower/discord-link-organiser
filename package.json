@@ -22,7 +22,7 @@
     "bufferutil": "^4.0.7",
     "discord-api-types": "0.37.53",
     "discord.js": "14.11.x",
-    "erlpack": "github:discord/erlpack",
+    "erlpack": "github:discord/erlpack#2a4c0e832f3cd4e07c92d4baec326a631ed50f59",
     "ts-node": "^10.9.1",
     "tslib": "^2.6.0",
     "utf-8-validate": "^6.0.3",
