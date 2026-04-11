@@ -321,7 +321,7 @@ export class GirlsClient {
       // last hewo must be at least 10 seconds ago
       // don't update lastHewo if this attempt didn't work
       if (this.lastHewo + 1000 * 10 < thisHewo) {
-        void message.channel.send(`HE\u2060WO ${author}`);
+        void message.channel.send(`HE\u2060WO ${author.toString()}`);
         this.lastHewo = thisHewo;
       }
       return;
@@ -528,7 +528,7 @@ export class GirlsClient {
         });
       } catch {
         const repostMessage = await message.channel.send({
-          content: `${author}, I couldn't DM you!\n\n${content}`,
+          content: `${author.toString()}, I couldn't DM you!\n\n${content}`,
           allowedMentions: { users: [author.id] },
         });
         await delay(10000);
