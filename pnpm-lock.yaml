@@ -26,9 +26,6 @@ importers:
       '@mikro-orm/reflection':
         specifier: 5.9.x
         version: 5.9.8(@mikro-orm/core@5.9.8)
-      discord-api-types:
-        specifier: 0.37.53
-        version: 0.37.53
       discord.js:
         specifier: 14.13.x
         version: 14.13.0(bufferutil@4.0.7)(utf-8-validate@6.0.3)
@@ -1061,9 +1058,6 @@ packages:
 
   discord-api-types@0.37.50:
     resolution: {integrity: sha512-X4CDiMnDbA3s3RaUXWXmgAIbY1uxab3fqe3qwzg5XutR3wjqi7M3IkgQbsIBzpqBN2YWr/Qdv7JrFRqSgb4TFg==}
-
-  discord-api-types@0.37.53:
-    resolution: {integrity: sha512-N6uUgv50OyP981Mfxrrt0uxcqiaNr0BDaQIoqfk+3zM2JpZtwU9v7ce1uaFAP53b2xSDvcbrk80Kneui6XJgGg==}
 
   discord-api-types@0.37.61:
     resolution: {integrity: sha512-o/dXNFfhBpYHpQFdT6FWzeO7pKc838QeeZ9d91CfVAtpr5XLK4B/zYxQbYgPdoMiTDvJfzcsLW5naXgmHGDNXw==}
@@ -2603,8 +2597,6 @@ snapshots:
       path-type: 4.0.0
 
   discord-api-types@0.37.50: {}
-
-  discord-api-types@0.37.53: {}
 
   discord-api-types@0.37.61: {}
 
