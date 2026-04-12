@@ -309,6 +309,13 @@ export class GirlsClient {
     message: Message | PartialMessage,
     dbMessage: DbMessage,
   ) {
+    const channel = message.channel;
+    if (!channel.isSendable()) {
+      console.log(
+        `reposts: ${message.id}'s channel (${channel.id}) isn't sendable (type ${channel.type})?`,
+      );
+      return;
+    }
     // The author is probably in the cache.
     const author = await this.client.users.fetch(dbMessage.author);
     if (
@@ -321,7 +328,7 @@ export class GirlsClient {
       // last hewo must be at least 10 seconds ago
       // don't update lastHewo if this attempt didn't work
       if (this.lastHewo + 1000 * 10 < thisHewo) {
-        void message.channel.send(`HE\u2060WO ${author.toString()}`);
+        void channel.send(`HE\u2060WO ${author.toString()}`);
         this.lastHewo = thisHewo;
       }
       return;
@@ -528,7 +535,7 @@ export class GirlsClient {
           content,
         });
       } catch {
-        const repostMessage = await message.channel.send({
+        const repostMessage = await channel.send({
           content: `${author.toString()}, I couldn't DM you!\n\n${content}`,
           allowedMentions: { users: [author.id] },
         });

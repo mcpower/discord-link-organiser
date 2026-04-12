@@ -6,4 +6,4 @@ allowBuilds:
   zlib-sync: true
 
 overrides:
-  "@discordjs/builders": "1.8.x"
+  "@discordjs/builders": "1.9.x"
