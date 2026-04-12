@@ -6,7 +6,6 @@ settings:
 
 overrides:
   '@discordjs/builders': 1.6.x
-  '@discordjs/ws': 1.0.x
 
 importers:
 
@@ -25,7 +24,7 @@ importers:
         specifier: ^5.9.8
         version: 5.9.8(@mikro-orm/core@5.9.8)
       discord.js:
-        specifier: 14.13.x
+        specifier: 14.13.0
         version: 14.13.0(bufferutil@4.0.7)(utf-8-validate@6.0.3)
       ts-node:
         specifier: ^10.9.2
@@ -53,7 +52,7 @@ importers:
         specifier: ^0.20.0
         version: 0.20.0
       typescript:
-        specifier: 5.3.x
+        specifier: 5.3.3
         version: 5.3.3
       vitest:
         specifier: ^4.1.4
@@ -110,8 +109,8 @@ packages:
     resolution: {integrity: sha512-3LKP7F2+atl9vJFhaBjn4nOaSWahZ/yWjOvA4e5pnXkt2qyXRCHLxoBQy81GFtLGCq7K9lPm9R517M1U+/90Qg==}
     engines: {node: '>=18'}
 
-  '@discordjs/ws@1.0.2':
-    resolution: {integrity: sha512-+XI82Rm2hKnFwAySXEep4A7Kfoowt6weO6381jgW+wVdTpMS/56qCvoXyFRY0slcv7c/U8My2PwIB2/wEaAh7Q==}
+  '@discordjs/ws@1.2.3':
+    resolution: {integrity: sha512-wPlQDxEmlDg5IxhJPuxXr3Vy9AjYq5xCvFWGJyD7w7Np8ZGu+Mc+97LCoEc/+AYCo2IDpKioiH0/c/mj5ZR9Uw==}
     engines: {node: '>=16.11.0'}
 
   '@esbuild/aix-ppc64@0.25.12':
@@ -1948,7 +1947,7 @@ snapshots:
     dependencies:
       discord-api-types: 0.38.45
 
-  '@discordjs/ws@1.0.2(bufferutil@4.0.7)(utf-8-validate@6.0.3)':
+  '@discordjs/ws@1.2.3(bufferutil@4.0.7)(utf-8-validate@6.0.3)':
     dependencies:
       '@discordjs/collection': 2.1.1
       '@discordjs/rest': 2.6.1
@@ -1956,7 +1955,7 @@ snapshots:
       '@sapphire/async-queue': 1.5.5
       '@types/ws': 8.18.1
       '@vladfrangu/async_event_emitter': 2.4.7
-      discord-api-types: 0.37.61
+      discord-api-types: 0.38.45
       tslib: 2.8.1
       ws: 8.20.0(bufferutil@4.0.7)(utf-8-validate@6.0.3)
     transitivePeerDependencies:
@@ -2659,7 +2658,7 @@ snapshots:
       '@discordjs/formatters': 0.3.3
       '@discordjs/rest': 2.6.1
       '@discordjs/util': 1.2.0
-      '@discordjs/ws': 1.0.2(bufferutil@4.0.7)(utf-8-validate@6.0.3)
+      '@discordjs/ws': 1.2.3(bufferutil@4.0.7)(utf-8-validate@6.0.3)
       '@sapphire/snowflake': 3.5.5
       '@types/ws': 8.18.1
       discord-api-types: 0.37.50
