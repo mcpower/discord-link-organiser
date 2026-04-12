@@ -1,5 +1,5 @@
 // Type checked config file with TypeScript.
-import * as config from "../config.json";
+import config from "../config.json" with { type: "json" };
 
 config satisfies {
   token: string;
@@ -11,4 +11,4 @@ config satisfies {
   discordDebug: boolean;
 };
 
-export = config;
+export default config;

@@ -5,9 +5,9 @@ import {
   RESTPostAPIApplicationCommandsJSONBody,
   Routes,
 } from "discord.js";
-import { Message as DbMessage } from "../entities";
-import { compareBigints } from "../utils/bigints";
-import config from "../config";
+import { Message as DbMessage } from "../entities/index.js";
+import { compareBigints } from "../utils/bigints.js";
+import config from "../config.js";
 
 const MAX_MESSAGES_PER_FETCH = 100;
 

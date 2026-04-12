@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { delay } from "./delay";
-import { LockQueue } from "./LockQueue";
+import { delay } from "./delay.js";
+import { LockQueue } from "./LockQueue.js";
 
 describe("LockQueue", () => {
   test("works", async () => {

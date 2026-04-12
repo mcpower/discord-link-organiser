@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { compareBigints } from "./bigints";
+import { compareBigints } from "./bigints.js";
 
 const FILLER = "0123456789".repeat(5);
 describe("compareBigints", () => {

@@ -1,5 +1,5 @@
 import assert from "assert";
-import { Queue } from "./Queue";
+import { Queue } from "./Queue.js";
 
 type AsyncFunction = () => Promise<unknown>;
 

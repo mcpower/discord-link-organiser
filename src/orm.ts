@@ -1,8 +1,8 @@
 import { MikroORM } from "@mikro-orm/core";
 import type { BetterSqliteDriver } from "@mikro-orm/better-sqlite";
-import config from "./orm.config";
+import ormConfig from "./orm.config.js";
 
-const ormPromise = MikroORM.init<BetterSqliteDriver>(config);
+const ormPromise = MikroORM.init<BetterSqliteDriver>(ormConfig);
 
 export async function getEm() {
   const orm = await ormPromise;

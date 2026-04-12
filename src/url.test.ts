@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { parseMessage } from "./url";
+import { parseMessage } from "./url.js";
 
 describe("urlsAndCommentFromMessage", () => {
   test("works with a single URL", () => {

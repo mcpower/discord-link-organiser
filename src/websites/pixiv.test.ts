@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { parsePixivUrl } from "./pixiv";
+import { parsePixivUrl } from "./pixiv.js";
 
 describe("parsePixivUrl", () => {
   test("works with a random pixiv link", () => {

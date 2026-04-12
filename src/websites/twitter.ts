@@ -1,4 +1,4 @@
-import { compareBigints, MAX_SQL_INT } from "../utils/bigints";
+import { compareBigints, MAX_SQL_INT } from "../utils/bigints.js";
 
 const HOSTS = [
   // Official

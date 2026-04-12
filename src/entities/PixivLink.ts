@@ -8,9 +8,9 @@ import {
   QueryOrder,
   Reference,
 } from "@mikro-orm/core";
-import { Message } from ".";
-import { EM } from "../orm";
-import { parsePixivUrl } from "../websites/pixiv";
+import { Message } from "./index.js";
+import { EM } from "../orm.js";
+import { parsePixivUrl } from "../websites/pixiv.js";
 
 @Entity()
 // Used for "get all posts in channel which sent a link before a given time"

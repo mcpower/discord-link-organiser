@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Queue } from "./Queue";
+import { Queue } from "./Queue.js";
 
 describe("queue", () => {
   test("works", () => {

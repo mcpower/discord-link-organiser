@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
-import { GirlsClient } from "./src/discord/client";
+import { GirlsClient } from "./src/discord/client.js";
 
-import { putGuildCommands } from "./src/discord/lib";
+import { putGuildCommands } from "./src/discord/lib.js";
 
 void new GirlsClient().run();
 

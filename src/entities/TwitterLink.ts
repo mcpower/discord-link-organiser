@@ -8,9 +8,9 @@ import {
   QueryOrder,
   Reference,
 } from "@mikro-orm/core";
-import { Message } from ".";
-import { EM } from "../orm";
-import { parseTwitterUrl } from "../websites/twitter";
+import { Message } from "./index.js";
+import { EM } from "../orm.js";
+import { parseTwitterUrl } from "../websites/twitter.js";
 
 @Entity()
 // Used for "get all posts in channel which sent a link before a given time"

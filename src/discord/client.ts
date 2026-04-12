@@ -11,15 +11,15 @@ import {
   PermissionFlagsBits,
   Snowflake,
 } from "discord.js";
-import * as config from "../config";
+import config from "../config.js";
 import assert from "assert";
-import { getAllMessages, toDbMessageAndPopulate } from "./lib";
-import { Message as DbMessage, User as DbUser } from "../entities";
-import { EM, getEm } from "../orm";
-import { delay } from "../utils/delay";
-import { LockQueue } from "../utils/LockQueue";
-import { URL_REGEX } from "../url";
-import { isHewo } from "../utils/isHewo";
+import { getAllMessages, toDbMessageAndPopulate } from "./lib.js";
+import { Message as DbMessage, User as DbUser } from "../entities/index.js";
+import { EM, getEm } from "../orm.js";
+import { delay } from "../utils/delay.js";
+import { LockQueue } from "../utils/LockQueue.js";
+import { URL_REGEX } from "../url.js";
+import { isHewo } from "../utils/isHewo.js";
 
 export class GirlsClient {
   client: Client;

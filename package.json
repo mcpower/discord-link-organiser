@@ -4,6 +4,7 @@
   "description": "discord link organiser",
   "license": "MIT",
   "author": "mcpower",
+  "type": "module",
   "main": "build/index.js",
   "scripts": {
     "start": "ts-node index.ts",
@@ -28,13 +29,13 @@
   "devDependencies": {
     "@mikro-orm/cli": "5.9.x",
     "@types/node": "^18.16.0",
-    "@vitest/coverage-v8": "^0.34.6",
+    "@vitest/coverage-v8": "^1.0.0",
     "oxfmt": "^0.44.0",
     "oxlint": "^1.59.0",
     "oxlint-tsgolint": "^0.20.0",
+    "rollup": "4.20.x",
     "typescript": "5.3.x",
-    "vite": "^3.1.0",
-    "vitest": "^0.34.6"
+    "vitest": "^1.0.0"
   },
   "engines": {
     "node": ">=16 <=20"

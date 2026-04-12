@@ -1,4 +1,4 @@
-import { parseTwitterUrl } from "./twitter";
+import { parseTwitterUrl } from "./twitter.js";
 import { describe, expect, test } from "vitest";
 
 describe("parseTwitterUrl", () => {

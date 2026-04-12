@@ -7,9 +7,9 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import { PixivLink, TwitterLink } from ".";
-import { EM } from "../orm";
-import { parseMessage } from "../url";
+import { PixivLink, TwitterLink } from "./index.js";
+import { EM } from "../orm.js";
+import { parseMessage } from "../url.js";
 
 // Store IDs as strings as our ORM can't support 64 bit ints.
 // TODO: In 2080, the ID index and getLastMessage queries will not work. Use
