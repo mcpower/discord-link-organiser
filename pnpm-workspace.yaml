@@ -4,3 +4,7 @@ allowBuilds:
   erlpack: true
   utf-8-validate: true
   zlib-sync: true
+
+overrides:
+  "@discordjs/builders": "1.6.x"
+  "@discordjs/ws": "1.0.x"
