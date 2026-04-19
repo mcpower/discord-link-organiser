@@ -1,4 +1,3 @@
-As of b1a9d95f, upgrading the following results in issues:
+As of 715467c8, upgrading the following results in issues:
 
-- Typescript 5.3 -> 5.4: MikroORM deps (Knex, ts-morph, type-fest) has type errors.
-- @discordjs/ws 1.0 -> 1.1: TypeScript 5.3 is too old.
+- Node 20 to 24: better-sqlite v11 doesn't support it. Can probably do 22?
