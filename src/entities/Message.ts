@@ -6,6 +6,7 @@ import {
   OneToMany,
   PrimaryKey,
   Property,
+  raw,
 } from "@mikro-orm/core";
 import { PixivLink, TwitterLink } from "./index.js";
 import { EM } from "../orm.js";
@@ -150,12 +151,18 @@ export class Message {
     // and t2.created < t1.created
     //
     // Most ORMs can't handle this... and (number of links) is almost always 1.
-    const nestedLinks = await Promise.all(
-      [this.twitterLinks, this.pixivLinks].map(async (collection) => {
-        const links = await collection.loadItems();
-        return Promise.all(links.map((link) => link.lastLink(em)));
-      }),
-    );
+    const wtf = async (
+      collection: Collection<{
+        lastLink(em: EM): Promise<TwitterLink | PixivLink | undefined>;
+      }>,
+    ) => {
+      const links = await collection.loadItems();
+      return Promise.all(links.map((link) => link.lastLink(em)));
+    };
+    const nestedLinks = await Promise.all([
+      wtf(this.twitterLinks),
+      wtf(this.pixivLinks),
+    ]);
     return nestedLinks
       .flat()
       .filter(
@@ -176,7 +183,9 @@ export class Message {
   static async getLastMessage(channel: string, em: EM): Promise<string> {
     const qb = em.createQueryBuilder(Message);
     const lastMessage: { id: string } = await qb
-      .select("cast(coalesce(max(cast(`id` as bigint)), 0) as text) as `id`")
+      .select(
+        raw("cast(coalesce(max(cast(`id` as bigint)), 0) as text) as `id`"),
+      )
       .where({ channel })
       .execute("get", false);
     return lastMessage.id;

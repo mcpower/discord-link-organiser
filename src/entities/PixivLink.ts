@@ -22,7 +22,7 @@ export class PixivLink {
   @PrimaryKey({ autoincrement: true })
   id?: number;
 
-  @ManyToOne({ onDelete: "cascade" })
+  @ManyToOne({ deleteRule: "cascade" })
   message: Ref<Message>;
 
   @Property()

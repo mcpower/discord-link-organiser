@@ -15,22 +15,22 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@mikro-orm/better-sqlite": "^5.9.8",
-    "@mikro-orm/core": "^5.9.8",
-    "@mikro-orm/migrations": "^5.9.8",
-    "@mikro-orm/reflection": "^5.9.8",
+    "@mikro-orm/better-sqlite": "^6.6.13",
+    "@mikro-orm/core": "^6.6.13",
+    "@mikro-orm/migrations": "^6.6.13",
+    "@mikro-orm/reflection": "^6.6.13",
     "discord.js": "~14.26.3",
     "ts-node": "^10.9.2",
     "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@mikro-orm/cli": "^5.9.8",
+    "@mikro-orm/cli": "^6.6.13",
     "@types/node": "^20.19.39",
     "@vitest/coverage-v8": "^4.1.4",
     "oxfmt": "^0.44.0",
     "oxlint": "^1.59.0",
     "oxlint-tsgolint": "^0.20.0",
-    "typescript": "5.3.x",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.4"
   },
   "engines": {

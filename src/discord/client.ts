@@ -20,6 +20,7 @@ import { delay } from "../utils/delay.js";
 import { LockQueue } from "../utils/LockQueue.js";
 import { URL_REGEX } from "../url.js";
 import { isHewo } from "../utils/isHewo.js";
+import { PopulatePath } from "@mikro-orm/core";
 
 export class GirlsClient {
   client: Client;
@@ -244,7 +245,7 @@ export class GirlsClient {
     // Update content and editedTimestamp.
     // Populating dbMessage is necessary to ensure twitterLinks and pixivLinks
     // get correctly cleared.
-    await em.populate(dbMessage, true);
+    await em.populate(dbMessage, [PopulatePath.ALL]);
     dbMessage.content = message.content;
     if (message.editedTimestamp !== null) {
       dbMessage.setEdited(message.editedTimestamp);
@@ -456,7 +457,7 @@ export class GirlsClient {
               // else the link entity still exists within the ORM, which points
               // to the original entity, so it gets revived next time we flush.
               // Unfortunately, that means we need to explicitly populate this.
-              await em.populate(messageToFetch, true);
+              await em.populate(messageToFetch, [PopulatePath.ALL]);
               em.remove(messageToFetch);
               return;
             }
