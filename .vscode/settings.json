@@ -1,7 +1,5 @@
 {
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "oxc.oxc-vscode",
-  "coverage-gutters.coverageFileNames": ["coverage/lcov.info"],
-  "vitest.enable": true,
-  "testing.automaticallyOpenPeekView": "never"
+  "vitest.watchOnStartup": true
 }

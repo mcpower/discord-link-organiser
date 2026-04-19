@@ -3,6 +3,6 @@
     "editorconfig.editorconfig",
     "oxc.oxc-vscode",
     "ryanluker.vscode-coverage-gutters",
-    "zixuanchen.vitest-explorer"
+    "vitest.explorer"
   ]
 }
