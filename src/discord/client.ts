@@ -55,7 +55,7 @@ export class GirlsClient {
     this.channelLock = new LockQueue();
     this.lastHewo = 0;
 
-    this.client.on("ready", (client) => {
+    this.client.on("clientReady", (client) => {
       // Note that this gets really messy if we support multiple channels...
       this.channelLock.enqueue(() => this.ready(client));
     });
