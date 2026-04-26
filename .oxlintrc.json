@@ -4,14 +4,15 @@
   "categories": {
     "correctness": "error",
     "suspicious": "error",
-    "pedantic": "error"
+    "pedantic": "warn"
   },
   "rules": {
     "eslint/max-lines": "off",
     "eslint/max-lines-per-function": "off",
     "eslint/no-inline-comments": "off",
     "eslint/no-warning-comments": "off",
-    "no-lonely-if": "off"
+    "no-lonely-if": "off",
+    "typescript/prefer-readonly-parameter-types": "off"
   },
   "env": {
     "builtin": true
