@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@mikro-orm/cli": "^6.6.13",
-    "@types/node": "^20.19.39",
+    "@types/node": "^22.19.17",
     "@vitest/coverage-v8": "^4.1.4",
     "oxfmt": "^0.44.0",
     "oxlint": "^1.59.0",
@@ -34,7 +34,7 @@
     "vitest": "^4.1.4"
   },
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "mikro-orm": {
     "useTsNode": true,
