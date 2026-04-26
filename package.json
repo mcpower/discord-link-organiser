@@ -7,9 +7,9 @@
   "type": "module",
   "main": "build/index.js",
   "scripts": {
-    "start": "ts-node index.ts",
+    "start": "node --no-warnings=ExperimentalWarning --loader ts-node/esm index.ts",
     "startProd": "tsc && node ./build/index.js",
-    "debug": "node -r ts-node/register --inspect index.ts",
+    "debug": "node --no-warnings=ExperimentalWarning --loader ts-node/esm --inspect index.ts",
     "lint": "oxlint",
     "fmt": "oxfmt",
     "test": "vitest"
@@ -20,7 +20,6 @@
     "@mikro-orm/migrations": "^6.6.13",
     "@mikro-orm/reflection": "^6.6.13",
     "discord.js": "~14.26.3",
-    "ts-node": "^10.9.2",
     "tslib": "^2.8.1"
   },
   "devDependencies": {
@@ -31,6 +30,7 @@
     "oxfmt": "^0.46.0",
     "oxlint": "^1.61.0",
     "oxlint-tsgolint": "^0.22.0",
+    "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
     "vitest": "^4.1.4"
   },
