@@ -1,17 +1,13 @@
 {
+  "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
-    // Taken from https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping
-    "target": "ES2021",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "lib": ["ES2021"],
     "outDir": "./build",
 
-    "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
-    "esModuleInterop": true,
+    "skipLibCheck": false,
+
     "resolveJsonModule": true,
 
     "experimentalDecorators": true,
