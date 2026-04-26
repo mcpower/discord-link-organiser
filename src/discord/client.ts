@@ -206,7 +206,7 @@ export class GirlsClient {
       message,
       this.client.readyTimestamp ?? undefined,
     );
-    await em.persistAndFlush(dbMessage);
+    await em.persist(dbMessage).flush();
     await this.handleViolations(em, message, dbMessage);
   }
 
