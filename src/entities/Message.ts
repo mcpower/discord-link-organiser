@@ -1,13 +1,11 @@
+import { Cascade, Collection, raw } from "@mikro-orm/core";
 import {
-  Cascade,
-  Collection,
   Entity,
   Index,
   OneToMany,
   PrimaryKey,
   Property,
-  raw,
-} from "@mikro-orm/core";
+} from "@mikro-orm/decorators/legacy";
 import { PixivLink, TwitterLink } from "./index.js";
 import { EM } from "../orm.js";
 import { parseMessage } from "../url.js";
@@ -151,17 +149,13 @@ export class Message {
     // and t2.created < t1.created
     //
     // Most ORMs can't handle this... and (number of links) is almost always 1.
-    const wtf = async (
-      collection: Collection<{
-        lastLink(em: EM): Promise<TwitterLink | PixivLink | undefined>;
-      }>,
-    ) => {
-      const links = await collection.loadItems();
-      return Promise.all(links.map((link) => link.lastLink(em)));
-    };
     const nestedLinks = await Promise.all([
-      wtf(this.twitterLinks),
-      wtf(this.pixivLinks),
+      this.twitterLinks
+        .loadItems()
+        .then((links) => Promise.all(links.map((link) => link.lastLink(em)))),
+      this.pixivLinks
+        .loadItems()
+        .then((links) => Promise.all(links.map((link) => link.lastLink(em)))),
     ]);
     return nestedLinks
       .flat()

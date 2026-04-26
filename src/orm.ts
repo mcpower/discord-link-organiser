@@ -1,8 +1,8 @@
 import { MikroORM } from "@mikro-orm/core";
-import type { BetterSqliteDriver } from "@mikro-orm/better-sqlite";
+import type { EntityManager, SqliteDriver } from "@mikro-orm/sqlite";
 import ormConfig from "./orm.config.js";
 
-const ormPromise = MikroORM.init<BetterSqliteDriver>(ormConfig);
+const ormPromise = MikroORM.init<SqliteDriver>(ormConfig);
 
 export async function getEm() {
   const orm = await ormPromise;
@@ -13,4 +13,4 @@ export function getOrm() {
   return ormPromise;
 }
 
-export type EM = Awaited<ReturnType<typeof getEm>>;
+export type EM = EntityManager<SqliteDriver>;

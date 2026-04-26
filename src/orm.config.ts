@@ -1,4 +1,4 @@
-import { defineConfig } from "@mikro-orm/better-sqlite";
+import { defineConfig } from "@mikro-orm/sqlite";
 import { TsMorphMetadataProvider } from "@mikro-orm/reflection";
 import * as entities from "./entities/index.js";
 import config from "./config.js";

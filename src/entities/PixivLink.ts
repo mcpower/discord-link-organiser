@@ -1,13 +1,11 @@
+import { Ref, QueryOrder, Reference } from "@mikro-orm/core";
 import {
   Entity,
-  Ref,
   Index,
   ManyToOne,
   PrimaryKey,
   Property,
-  QueryOrder,
-  Reference,
-} from "@mikro-orm/core";
+} from "@mikro-orm/decorators/legacy";
 import { Message } from "./index.js";
 import { EM } from "../orm.js";
 import { parsePixivUrl } from "../websites/pixiv.js";
